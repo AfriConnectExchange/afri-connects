@@ -148,16 +148,16 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
 
   const filteredCourses = featuredCourses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
+                          course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesCategory = selectedCategory === 'all' || course.category.toLowerCase() === selectedCategory;
     
     const matchesPrice = priceFilter === 'all' || 
-                        (priceFilter === 'free' && course.price === 0) ||
-                        (priceFilter === 'under-50' && course.price < 50) ||
-                        (priceFilter === '50-100' && course.price >= 50 && course.price <= 100) ||
-                        (priceFilter === 'over-100' && course.price > 100);
+                         (priceFilter === 'free' && course.price === 0) ||
+                         (priceFilter === 'under-50' && course.price < 50) ||
+                         (priceFilter === '50-100' && course.price >= 50 && course.price <= 100) ||
+                         (priceFilter === 'over-100' && course.price > 100);
     
     const matchesLevel = levelFilter === 'all' || course.level.toLowerCase() === levelFilter;
     
@@ -368,7 +368,8 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
 
       {/* Stats Section - Custom Modern Layout */}
       <section className="py-14 bg-muted/30">
-        <div className="container mx-auto px-4">
+        
+        <div className="container mx-auto px-4 relative -mt-20">
           <div className="flex flex-col items-center md:flex-row md:justify-center md:gap-10 gap-6">
             {/* Stat Card */}
             <motion.div
