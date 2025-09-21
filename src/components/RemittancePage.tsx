@@ -1,499 +1,386 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
+// FILE: src/components/RemittancePage.tsx
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Send, History, Plus, Search, Filter, MapPin, Clock, CheckCircle, 
-  AlertCircle, Eye, Download, CreditCard, Wallet, Smartphone
+  Send, History, Search, CheckCircle, Clock, AlertCircle, Eye, Download, 
+  ArrowRight, User, Phone, CreditCard, Wallet, Loader2
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Textarea } from './ui/textarea';
 import { AnimatedButton } from './ui/animated-button';
 import { CustomModal } from './ui/custom-modal';
 import { CustomAlert } from './ui/custom-alert';
 
+// --- API Integration Hook ---
+const API_KEY = 'YOUR_API_KEY_HERE'; // IMPORTANT: Replace with your free key from exchangerate-api.com
+const BASE_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/GBP`;
+
+// Mock rates as a fallback if the API fails or key is missing
+const mockRates = { "NGN": 1800.52, "KES": 168.33, "GHS": 15.41, "ZAR": 22.87, "EGP": 59.20, "MAD": 12.44 };
+
+function useExchangeRates() {
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    async function fetchRates() {
+      if (API_KEY === 'YOUR_API_KEY_HERE') {
+        console.warn("Using mock exchange rates. Please add your ExchangeRate-API key.");
+        setRates(mockRates);
+        return;
+      }
+      try {
+        const response = await fetch(BASE_URL);
+        if (!response.ok) throw new Error('Failed to fetch rates');
+        const data = await response.json();
+        if (data.result === 'success') {
+          setRates(data.conversion_rates);
+        } else {
+          setRates(mockRates); // Fallback on API error
+        }
+      } catch (err) {
+        console.error(err);
+        setRates(mockRates); // Fallback on network error
+      }
+    }
+    fetchRates();
+  }, []);
+
+  return { rates };
+}
+
+
+// --- Component ---
 interface RemittancePageProps {
   onNavigate: (page: string) => void;
 }
-
-// Mock data for demonstration
 const mockTransfers = [
-  {
-    id: 'AC-REM-001',
-    recipient: 'John Doe',
-    amount: 250,
-    currency: 'GBP',
-    recipientCountry: 'Nigeria',
-    status: 'delivered',
-    date: '2024-01-20',
-    deliveryTime: '2024-01-20 14:30',
-    method: 'card',
-    fees: 5.99
-  },
-  {
-    id: 'AC-REM-002',
-    recipient: 'Sarah Johnson',
-    amount: 150,
-    currency: 'GBP',
-    recipientCountry: 'Kenya',
-    status: 'pending',
-    date: '2024-01-19',
-    deliveryTime: null,
-    method: 'wallet',
-    fees: 3.99
-  },
-  {
-    id: 'AC-REM-003',
-    recipient: 'Michael Brown',
-    amount: 500,
-    currency: 'GBP',
-    recipientCountry: 'Ghana',
-    status: 'failed',
-    date: '2024-01-18',
-    deliveryTime: null,
-    method: 'paypal',
-    fees: 12.50
-  }
+    { id: 'AC-REM-001', recipient: 'John Doe', recipientPhone: '+234 801 234 5678', amountSent: 250, recipientCountry: 'Nigeria', status: 'delivered', date: '2025-09-20T14:30:00Z', paymentMethod: 'Credit Card'},
+    { id: 'AC-REM-002', recipient: 'Sarah Johnson', recipientPhone: '+254 712 345 678', amountSent: 150, recipientCountry: 'Kenya', status: 'pending', date: '2025-09-19T10:00:00Z', paymentMethod: 'Digital Wallet'},
+    { id: 'AC-REM-003', recipient: 'Michael Brown', recipientPhone: '+233 24 123 4567', amountSent: 500, recipientCountry: 'Ghana', status: 'failed', date: '2025-09-18T16:45:00Z', paymentMethod: 'Credit Card'}
 ];
-
 const countries = [
-  { code: 'NG', name: 'Nigeria', flag: '🇳🇬' },
-  { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
-  { code: 'GH', name: 'Ghana', flag: '🇬🇭' },
-  { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
-  { code: 'EG', name: 'Egypt', flag: '🇪🇬' },
-  { code: 'MA', name: 'Morocco', flag: '🇲🇦' }
+  { code: 'NG', name: 'Nigeria', flag: '🇳🇬', currency: 'NGN' },
+  { code: 'KE', name: 'Kenya', flag: '🇰🇪', currency: 'KES' },
+  { code: 'GH', name: 'Ghana', flag: '🇬🇭', currency: 'GHS' },
+  { code: 'ZA', name: 'South Africa', flag: '🇿🇦', currency: 'ZAR' }
 ];
-
-const purposes = [
-  'Family Support',
-  'Education',
-  'Medical Expenses',
-  'Business Investment',
-  'Emergency Aid',
-  'Other'
-];
-
-const paymentMethods = [
-  { id: 'card', name: 'Debit/Credit Card', icon: CreditCard, fee: '2.9%' },
-  { id: 'wallet', name: 'Digital Wallet', icon: Wallet, fee: '1.9%' },
-  { id: 'paypal', name: 'PayPal', icon: Smartphone, fee: '3.4%' }
-];
+const MIN_SEND_AMOUNT = 5.00;
+const FEE_PERCENTAGE = 0.015; // 1.5%
 
 export function RemittancePage({ onNavigate }: RemittancePageProps) {
+  const { rates } = useExchangeRates();
   const [activeTab, setActiveTab] = useState<'send' | 'history'>('send');
-  const [showSendModal, setShowSendModal] = useState(false);
-  const [showTransferDetails, setShowTransferDetails] = useState<string | null>(null);
+  
+  // Modal State
+  const [modalView, setModalView] = useState<'send' | 'details' | null>(null);
+  const [selectedTransfer, setSelectedTransfer] = useState<(typeof mockTransfers)[0] | null>(null);
+  const [sendStep, setSendStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Form State
+  const [sendAmount, setSendAmount] = useState('');
+  const [receiveAmount, setReceiveAmount] = useState(0);
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [fee, setFee] = useState(0);
+  const [exchangeRate, setExchangeRate] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [recipientDetails, setRecipientDetails] = useState({ name: '', phone: '' });
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  
+  const [alertState, setAlertState] = useState<{ isOpen: boolean; type: 'success' | 'error'; title: string; message: string; }>({ isOpen: false, type: 'success', title: '', message: '' });
+  const showAlert = (type: 'success' | 'error', title: string, message: string) => setAlertState({ isOpen: true, type, title, message });
+
+  useEffect(() => {
+    const amount = parseFloat(sendAmount); setError(null);
+    if (!amount || isNaN(amount) || !rates || !selectedCountry) { setReceiveAmount(0); setFee(0); setExchangeRate(0); return; }
+    if (amount > 0 && amount < MIN_SEND_AMOUNT) { setError(`Minimum transfer amount is £${MIN_SEND_AMOUNT.toFixed(2)}`); setReceiveAmount(0); setFee(0); setExchangeRate(0); return; }
+    const rate = rates[selectedCountry.currency] || 0; const calculatedFee = amount * FEE_PERCENTAGE;
+    const amountToConvert = amount - calculatedFee; setExchangeRate(rate); setFee(calculatedFee); setReceiveAmount(amountToConvert * rate);
+  }, [sendAmount, selectedCountry, rates]);
+
+  // History State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  
-  // Send Money Form State
-  const [sendForm, setSendForm] = useState({
-    recipientName: '',
-    recipientPhone: '',
-    recipientCountry: '',
-    amount: '',
-    purpose: '',
-    paymentMethod: 'card',
-    notes: ''
-  });
-
-  const [alertState, setAlertState] = useState<{
-    isOpen: boolean;
-    type: 'success' | 'error' | 'warning' | 'info';
-    title: string;
-    message: string;
-  }>({
-    isOpen: false,
-    type: 'info',
-    title: '',
-    message: ''
-  });
-
-  const showAlert = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) => {
-    setAlertState({ isOpen: true, type, title, message });
-  };
-
-  const handleSendMoney = async () => {
-    setIsProcessing(true);
-    
-    // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    showAlert('success', 'Transfer Initiated!', 'Your money transfer has been queued for processing. The recipient will be notified once delivered.');
-    setShowSendModal(false);
-    setSendForm({
-      recipientName: '',
-      recipientPhone: '',
-      recipientCountry: '',
-      amount: '',
-      purpose: '',
-      paymentMethod: 'card',
-      notes: ''
-    });
-    setIsProcessing(false);
-  };
-
-  const calculateFees = (amount: number, method: string) => {
-    const methodData = paymentMethods.find(m => m.id === method);
-    if (!methodData) return 0;
-    
-    const feeRate = parseFloat(methodData.fee.replace('%', '')) / 100;
-    return Math.max(amount * feeRate, 2.99); // Minimum fee of £2.99
-  };
 
   const filteredTransfers = mockTransfers.filter(transfer => {
-    const matchesSearch = transfer.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         transfer.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = transfer.recipient.toLowerCase().includes(searchQuery.toLowerCase()) || transfer.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || transfer.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered': return 'bg-white text-primary border-border';
-      case 'pending': return 'bg-white text-primary border-border';
-      case 'failed': return 'bg-white text-primary border-border';
-      default: return 'bg-white text-primary border-border';
-    }
-  };
+  const handleOpenSendModal = () => { setModalView('send'); setSendStep(1); };
+  const handleOpenDetailsModal = (transfer: (typeof mockTransfers)[0]) => { setSelectedTransfer(transfer); setModalView('details'); };
+  const closeModal = () => { setModalView(null); setSendStep(1); setIsProcessing(false); };
 
-  const getStatusIcon = (status: string) => {
+  const handleFinalSend = async () => {
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsProcessing(false);
+    closeModal();
+    showAlert('success', 'Transfer Successful!', `Your transfer of £${parseFloat(sendAmount).toFixed(2)} to ${recipientDetails.name} has been initiated.`);
+    setSendAmount(''); setRecipientDetails({ name: '', phone: '' }); setPaymentMethod('card');
+  };
+  
+  const isSendDetailsValid = recipientDetails.name.length > 2 && recipientDetails.phone.length > 5;
+  const isButtonDisabled = !!error || !sendAmount || parseFloat(sendAmount) < MIN_SEND_AMOUNT;
+  
+  const getStatusProps = (status: string) => {
     switch (status) {
-      case 'delivered': return CheckCircle;
-      case 'pending': return Clock;
-      case 'failed': return AlertCircle;
-      default: return Clock;
+      case 'delivered': return { Icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' };
+      case 'pending': return { Icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100' };
+      case 'failed': return { Icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-100' };
+      default: return { Icon: Clock, color: 'text-gray-600', bg: 'bg-gray-100' };
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-white">
+    <div className="min-h-screen bg-slate-50">
+      <div className="border-b bg-white">
         <div className="container mx-auto px-4 py-6">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
-          >
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-2">Money Transfer</h1>
-              <p className="text-muted-foreground">Send money securely across Africa</p>
+              <h1 className="text-2xl font-bold text-gray-800">Money Transfer</h1>
+              <p className="text-gray-500">Send money securely across Africa</p>
             </div>
-            
-            <AnimatedButton
-              onClick={() => setShowSendModal(true)}
-              className="gap-2"
-              animationType="glow"
-            >
-              <Send className="w-4 h-4" />
-              Send Money
+            <AnimatedButton onClick={() => setActiveTab('send')} size="sm" className="flex items-center gap-2 !p-2 md:!px-4 md:!py-2">
+              <Send className="w-4 h-4" /> <span className="hidden md:inline">Send Money</span>
             </AnimatedButton>
           </motion.div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'send' | 'history')}>
-            <TabsList className="grid w-fit grid-cols-2 mb-8">
-              <TabsTrigger value="send">Send Money</TabsTrigger>
-              <TabsTrigger value="history">Transfer History</TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'send' | 'history')}>
+          <TabsList className="grid w-full md:w-fit grid-cols-2 mb-8 bg-slate-200/60 p-1 rounded-lg h-auto">
+            <TabsTrigger value="send" className="px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">Send Money</TabsTrigger>
+            <TabsTrigger value="history" className="px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">Transfer History</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="send">
-              <div className="max-w-2xl mx-auto">
-                <Card className="bg-white border border-border">
-                  <CardHeader className="text-center">
-                    <CardTitle>Quick Send</CardTitle>
-                    <CardDescription>Send money to family and friends across Africa</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Quick Send Form */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Recipient Name</Label>
-                        <Input placeholder="Enter recipient's name" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Phone Number</Label>
-                        <Input placeholder="+234 800 000 0000" />
+          <TabsContent value="send">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="bg-white border-0 shadow-lg shadow-slate-200/50 rounded-xl">
+                <CardContent className="p-6 md:p-10">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 items-center">
+                    <div className="md:col-span-2 space-y-3">
+                      <Label className="text-gray-500">You send</Label>
+                      <div className="relative">
+                        <Input 
+                          type="number" value={sendAmount} onChange={(e) => setSendAmount(e.target.value)}
+                          placeholder="0.00" 
+                          className="text-3xl md:text-4xl font-bold h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" 
+                        />
+                        <div className="absolute top-1/2 -translate-y-1/2 right-0 bg-slate-100 font-medium text-slate-700 px-4 py-2 rounded-lg">GBP</div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Country</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countries.map(country => (
-                              <SelectItem key={country.code} value={country.code}>
-                                {country.flag} {country.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
+                    <div className="flex justify-center my-2 md:my-0">
+                        <div className="bg-slate-200/70 p-3 rounded-full">
+                            <ArrowRight className="w-6 h-6 text-slate-500" />
+                        </div>
+                    </div>
+
+                    <div className="md:col-span-2 space-y-3">
+                      <Label className="text-gray-500">Recipient gets</Label>
+                       <div className="relative">
+                        <p className="text-3xl md:text-4xl font-bold text-primary truncate pr-28">
+                          {receiveAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        <Select onValueChange={(code) => setSelectedCountry(countries.find(c => c.code === code)!)} defaultValue={selectedCountry.code}>
+                            <SelectTrigger className="absolute top-1/2 -translate-y-1/2 right-0 w-auto bg-slate-100 font-medium text-slate-700 rounded-lg h-11">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.flag} {c.currency}</SelectItem>)}
+                            </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Amount (GBP)</Label>
-                        <Input placeholder="0.00" type="number" min="10" max="1000" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Purpose</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select purpose" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {purposes.map(purpose => (
-                            <SelectItem key={purpose} value={purpose.toLowerCase().replace(' ', '-')}>
-                              {purpose}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="p-4 bg-muted/20 rounded-lg">
-                      <h4 className="font-medium text-foreground mb-3">Transfer Summary</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Amount</span>
-                          <span className="text-foreground">£0.00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Transfer Fee</span>
-                          <span className="text-foreground">£0.00</span>
-                        </div>
-                        <div className="border-t pt-2 flex justify-between font-medium">
-                          <span className="text-foreground">Total</span>
-                          <span className="text-foreground">£0.00</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <AnimatedButton 
-                      className="w-full" 
-                      disabled
-                    >
-                      Continue to Payment
-                    </AnimatedButton>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="history">
-              <div className="space-y-6">
-                {/* Search and Filter */}
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search transfers..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="delivered">Delivered</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Transfer List */}
-                {filteredTransfers.length === 0 ? (
-                  <Card className="bg-white border border-border">
-                    <CardContent className="text-center py-12">
-                      <Send className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No transfers yet</h3>
-                      <p className="text-muted-foreground mb-4">Start by sending money to family and friends</p>
-                      <AnimatedButton onClick={() => setActiveTab('send')}>
-                        Send Your First Transfer
-                      </AnimatedButton>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredTransfers.map((transfer, index) => {
-                      const StatusIcon = getStatusIcon(transfer.status);
-                      const country = countries.find(c => c.name.toLowerCase() === transfer.recipientCountry.toLowerCase());
-                      
-                      return (
-                        <motion.div
-                          key={transfer.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <Card className="bg-white border border-border hover:shadow-md transition-shadow">
-                            <CardContent className="p-6">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                  <div className="w-12 h-12 bg-muted/20 rounded-full flex items-center justify-center">
-                                    <StatusIcon className="w-6 h-6 text-primary" />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium text-foreground">{transfer.recipient}</h3>
-                                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                      <span>{country?.flag} {transfer.recipientCountry}</span>
-                                      <span>•</span>
-                                      <span>{transfer.id}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div className="text-right">
-                                  <p className="font-semibold text-foreground">£{transfer.amount}</p>
-                                  <Badge variant="outline" className={getStatusColor(transfer.status)}>
-                                    {transfer.status}
-                                  </Badge>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-4 flex items-center justify-between">
-                                <p className="text-sm text-muted-foreground">
-                                  {transfer.status === 'delivered' && transfer.deliveryTime
-                                    ? `Delivered on ${new Date(transfer.deliveryTime).toLocaleString()}`
-                                    : `Sent on ${new Date(transfer.date).toLocaleDateString()}`
-                                  }
-                                </p>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setShowTransferDetails(transfer.id)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </div>
-
-      {/* Send Money Modal */}
-      <CustomModal
-        isOpen={showSendModal}
-        onClose={() => setShowSendModal(false)}
-        title="Send Money"
-        description="Complete the transfer details and select payment method"
-        size="lg"
-      >
-        <div className="space-y-6">
-          <div className="p-4 bg-muted/20 rounded-lg">
-            <h4 className="font-medium text-foreground mb-2">Demo Mode</h4>
-            <p className="text-sm text-muted-foreground">
-              This is a demonstration of the money transfer flow. In the full version, actual payment processing and delivery would occur.
-            </p>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <AnimatedButton
-              onClick={handleSendMoney}
-              isLoading={isProcessing}
-              loadingText="Processing..."
-              className="flex-1"
-            >
-              Send Transfer
-            </AnimatedButton>
-            <Button
-              variant="outline"
-              onClick={() => setShowSendModal(false)}
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </CustomModal>
-
-      {/* Transfer Details Modal */}
-      <CustomModal
-        isOpen={!!showTransferDetails}
-        onClose={() => setShowTransferDetails(null)}
-        title="Transfer Details"
-        description="Complete information about your money transfer"
-        size="md"
-      >
-        {showTransferDetails && (
-          <div className="space-y-4">
-            {(() => {
-              const transfer = mockTransfers.find(t => t.id === showTransferDetails);
-              if (!transfer) return null;
-              
-              return (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Transaction ID</p>
-                      <p className="font-medium text-foreground">{transfer.id}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Amount</p>
-                      <p className="font-medium text-foreground">£{transfer.amount}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Fees</p>
-                      <p className="font-medium text-foreground">£{transfer.fees}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Status</p>
-                      <Badge variant="outline" className={getStatusColor(transfer.status)}>
-                        {transfer.status}
-                      </Badge>
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full gap-2">
-                    <Download className="w-4 h-4" />
-                    Download Receipt
-                  </Button>
-                </div>
-              );
-            })()}
-          </div>
-        )}
-      </CustomModal>
+                  <div className="mt-8 pt-6 border-t border-dashed">
+                    {error && (
+                       <motion.p initial={{ opacity: 0}} animate={{ opacity: 1}} className="text-center text-red-600 text-sm font-medium mb-4">{error}</motion.p>
+                    )}
+                    <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex justify-between items-center">
+                            <p>Exchange rate:</p>
+                            <p className="font-medium text-gray-800">1 GBP ≈ {(exchangeRate || 0).toFixed(2)} {selectedCountry.currency}</p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <p>Fee ({(FEE_PERCENTAGE * 100).toFixed(2)}%):</p>
+                            <p className="font-medium text-gray-800">£{fee.toFixed(2)}</p>
+                        </div>
+                        <div className="flex justify-between items-center font-semibold text-gray-800 mt-3 pt-3 border-t">
+                            <p>Total to pay:</p>
+                            <p>£{(parseFloat(sendAmount) || 0).toFixed(2)}</p>
+                        </div>
+                    </div>
+                  </div>
 
-      {/* Custom Alert */}
-      <CustomAlert
-        isOpen={alertState.isOpen}
-        onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
-        type={alertState.type}
-        title={alertState.title}
-        message={alertState.message}
-        autoClose={alertState.type === 'success'}
-      />
+                   <AnimatedButton size="lg" className="w-full mt-8" disabled={isButtonDisabled} onClick={handleOpenSendModal}>
+                        Continue Transaction
+                    </AnimatedButton>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="history">
+             <div className="space-y-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input placeholder="Search by name or ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white" />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full md:w-48 bg-white"><SelectValue placeholder="All Status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                {filteredTransfers.map(transfer => {
+                  const { Icon, color, bg } = getStatusProps(transfer.status);
+                  const country = countries.find(c => c.name === transfer.recipientCountry);
+                  return (
+                    <motion.div key={transfer.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onClick={() => handleOpenDetailsModal(transfer)} className="cursor-pointer">
+                      <div className="bg-white p-4 rounded-lg border border-transparent hover:border-primary/40 hover:shadow-sm transition-all">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${bg}`}>
+                                    <Icon className={`w-6 h-6 ${color}`} />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-800">{transfer.recipient}</h3>
+                                    <p className="text-sm text-gray-500">
+                                        {country?.flag} To {transfer.recipientCountry} • {transfer.id}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="font-bold text-lg text-gray-800">
+                                    £{transfer.amountSent.toFixed(2)}
+                                </p>
+                                <p className={`text-sm font-medium capitalize ${color}`}>{transfer.status}</p>
+                            </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* --- MODALS --- */}
+      <AnimatePresence>
+        {modalView === 'send' && (
+          <CustomModal isOpen={true} onClose={closeModal} title="Complete Your Transfer" description={`Step ${sendStep} of 3`}>
+              {sendStep === 1 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                      <h3 className="font-semibold text-lg">Recipient Details</h3>
+                      <div className="space-y-2">
+                          <Label htmlFor="rec-name">Recipient's Full Name</Label>
+                          <Input id="rec-name" placeholder="e.g. John Doe" value={recipientDetails.name} onChange={e => setRecipientDetails({...recipientDetails, name: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="rec-phone">Recipient's Phone Number</Label>
+                          <Input id="rec-phone" placeholder="+234 800 000 0000" value={recipientDetails.phone} onChange={e => setRecipientDetails({...recipientDetails, phone: e.target.value})} />
+                      </div>
+                      <AnimatedButton className="w-full mt-4" onClick={() => setSendStep(2)} disabled={!isSendDetailsValid}>Next</AnimatedButton>
+                  </motion.div>
+              )}
+              {sendStep === 2 && (
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                      <h3 className="font-semibold text-lg">Payment Method</h3>
+                      <div className="space-y-3">
+                          <div onClick={() => setPaymentMethod('card')} className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'}`}>
+                              <CreditCard className="w-6 h-6 text-primary"/>
+                              <div><p className="font-medium">Debit/Credit Card</p><p className="text-sm text-gray-500">Standard processing fees apply</p></div>
+                          </div>
+                          <div onClick={() => setPaymentMethod('wallet')} className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${paymentMethod === 'wallet' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'}`}>
+                              <Wallet className="w-6 h-6 text-primary"/>
+                              <div><p className="font-medium">Digital Wallet</p><p className="text-sm text-gray-500">Lower fees, faster processing</p></div>
+                          </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setSendStep(1)}>Back</Button>
+                        <AnimatedButton className="w-full" onClick={() => setSendStep(3)}>Next</AnimatedButton>
+                      </div>
+                  </motion.div>
+              )}
+              {sendStep === 3 && (
+                   <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+                        <h3 className="font-semibold text-lg">Review & Confirm</h3>
+                        <div className="p-4 bg-slate-100 rounded-lg space-y-2 text-sm">
+                            <div className="flex justify-between"><span className="text-gray-600">You are sending</span><span className="font-medium text-gray-900">£{parseFloat(sendAmount).toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Recipient</span><span className="font-medium text-gray-900">{recipientDetails.name}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">They receive approx.</span><span className="font-medium text-gray-900">{receiveAmount.toLocaleString('en-US', { style: 'currency', currency: selectedCountry.currency })}</span></div>
+                            <div className="flex justify-between border-t pt-2 mt-2"><span className="font-semibold text-gray-900">Total to be charged</span><span className="font-bold text-primary">£{(parseFloat(sendAmount)).toFixed(2)}</span></div>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                            <Button variant="outline" onClick={() => setSendStep(2)} disabled={isProcessing}>Back</Button>
+                            <AnimatedButton className="w-full gap-2" onClick={handleFinalSend} disabled={isProcessing}>
+                                {isProcessing && <Loader2 className="w-4 h-4 animate-spin"/>}
+                                {isProcessing ? "Processing..." : "Confirm & Send"}
+                            </AnimatedButton>
+                        </div>
+                   </motion.div>
+              )}
+          </CustomModal>
+        )}
+
+        {modalView === 'details' && selectedTransfer && (
+          <CustomModal isOpen={true} onClose={closeModal} title="Transfer Receipt" description={`ID: ${selectedTransfer.id}`}>
+              <div className="space-y-4">
+                  {(() => {
+                      const { Icon, color, bg } = getStatusProps(selectedTransfer.status);
+                      return (
+                          <>
+                              <div className="text-center py-4">
+                                  <p className="text-gray-500">Amount Sent</p>
+                                  <p className="text-4xl font-bold text-gray-800">£{selectedTransfer.amountSent.toFixed(2)}</p>
+                                  <div className={`mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${bg} ${color}`}>
+                                      <Icon className="w-4 h-4"/>
+                                      <span className="capitalize">{selectedTransfer.status}</span>
+                                  </div>
+                              </div>
+                              <div className="p-4 bg-slate-100 rounded-lg space-y-3">
+                                  <div className="flex justify-between items-center">
+                                      <span className="text-gray-600">From</span>
+                                      <span className="font-medium flex items-center gap-2">🇬🇧 You</span>
+                                  </div>
+                                  <div className="flex justify-center my-1"><ArrowRight className="w-4 h-4 text-gray-400"/></div>
+                                  <div className="flex justify-between items-center">
+                                      <span className="text-gray-600">To</span>
+                                      <span className="font-medium flex items-center gap-2">{countries.find(c=>c.name === selectedTransfer.recipientCountry)?.flag} {selectedTransfer.recipient}</span>
+                                  </div>
+                              </div>
+                              <div className="pt-2 space-y-2 text-sm">
+                                  <div className="flex justify-between"><span className="text-gray-600">Sent on</span><span className="font-medium text-gray-800">{new Date(selectedTransfer.date).toLocaleString()}</span></div>
+                                  <div className="flex justify-between"><span className="text-gray-600">Payment Method</span><span className="font-medium text-gray-800">{selectedTransfer.paymentMethod}</span></div>
+                              </div>
+                              <Button variant="outline" className="w-full gap-2"><Download className="w-4 h-4"/>Download Receipt</Button>
+                          </>
+                      );
+                  })()}
+              </div>
+          </CustomModal>
+        )}
+      </AnimatePresence>
+      
+      <CustomAlert isOpen={alertState.isOpen} onClose={() => setAlertState(prev => ({...prev, isOpen: false}))} type={alertState.type} title={alertState.title} message={alertState.message} />
     </div>
   );
 }
