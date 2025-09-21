@@ -1,3 +1,4 @@
+// FILE: src/pages/CoursesPage.jsx
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
@@ -17,7 +18,7 @@ interface CoursesPageProps {
   onNavigate: (page: string) => void;
 }
 
-// Mock data for courses
+// Mock data for courses (no changes here)
 const featuredCourses = [
   {
     id: 1,
@@ -186,8 +187,10 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
+      className="h-full"
     >
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+      {/* ADDED SUBTLE HOVER EFFECT WRAPPER */}
+      <Card className="group cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
         <CardContent className="p-0 flex-1 flex flex-col">
           {/* Course Image */}
           <div className="relative overflow-hidden rounded-t-lg">
@@ -213,7 +216,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
             </div>
 
             {/* Play Button */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <Button
                 size="lg"
                 className="rounded-full w-16 h-16 p-0 bg-white/90 hover:bg-white text-primary shadow-lg"
@@ -331,7 +334,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-16">
+      <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-16 lg:py-24">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -339,14 +342,16 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h1 className="text-3xl md:text-5xl font-bold mb-6">
+            {/* RESPONSIVE FONT SIZES */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Learn from African Experts
             </h1>
             <p className="text-lg md:text-xl opacity-90 mb-8 leading-relaxed">
               Discover skills, knowledge, and opportunities with courses designed specifically 
               for African entrepreneurs and professionals.
             </p>
-            <div className="flex flex-row gap-4 justify-center">
+            {/* RESPONSIVE BUTTON LAYOUT */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
                 variant="secondary"
@@ -366,54 +371,30 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
         </div>
       </section>
 
-      {/* Stats Section - Custom Modern Layout */}
+      {/* Stats Section */}
       <section className="py-14 bg-muted/30">
-        
-        <div className="container mx-auto px-4 relative -mt-20">
-          <div className="flex flex-col items-center md:flex-row md:justify-center md:gap-10 gap-6">
-            {/* Stat Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
-            >
+        <div className="container mx-auto px-4 relative -mt-24 lg:-mt-28">
+           {/* RESPONSIVE GRID FOR STATS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0 }} viewport={{ once: true }} className="bg-white rounded-2xl shadow-lg px-6 py-8 flex flex-col items-center text-center">
               <BookOpen className="w-10 h-10 text-primary mb-3" />
-              <span className="text-3xl font-extrabold text-foreground mb-1">150+</span>
+              {/* RESPONSIVE FONT SIZES */}
+              <span className="text-3xl lg:text-4xl font-extrabold text-foreground mb-1">150+</span>
               <span className="text-base text-muted-foreground font-medium">Courses</span>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} viewport={{ once: true }} className="bg-white rounded-2xl shadow-lg px-6 py-8 flex flex-col items-center text-center">
               <Users className="w-10 h-10 text-primary mb-3" />
-              <span className="text-3xl font-extrabold text-foreground mb-1">12,000+</span>
+              <span className="text-3xl lg:text-4xl font-extrabold text-foreground mb-1">12,000+</span>
               <span className="text-base text-muted-foreground font-medium">Students</span>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} viewport={{ once: true }} className="bg-white rounded-2xl shadow-lg px-6 py-8 flex flex-col items-center text-center">
               <Award className="w-10 h-10 text-primary mb-3" />
-              <span className="text-3xl font-extrabold text-foreground mb-1">45+</span>
+              <span className="text-3xl lg:text-4xl font-extrabold text-foreground mb-1">45+</span>
               <span className="text-base text-muted-foreground font-medium">Instructors</span>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} viewport={{ once: true }} className="bg-white rounded-2xl shadow-lg px-6 py-8 flex flex-col items-center text-center">
               <Globe className="w-10 h-10 text-primary mb-3" />
-              <span className="text-3xl font-extrabold text-foreground mb-1">25+</span>
+              <span className="text-3xl lg:text-4xl font-extrabold text-foreground mb-1">25+</span>
               <span className="text-base text-muted-foreground font-medium">Countries</span>
             </motion.div>
           </div>
@@ -421,39 +402,24 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
       </section>
 
       {/* Main Content */}
-      <section className="py-12">
+      <section className="py-12 lg:py-16">
         <div className="container mx-auto px-4">
-          {/* Filters */}
           <div className="mb-8">
             <div className="mb-6">
-              {/* Search Bar */}
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search courses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Search courses..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-12"/>
               </div>
-              {/* Filters Row: horizontal scroll on mobile, grid on desktop */}
-              <div className="flex md:grid md:grid-cols-3 gap-3 overflow-x-auto pb-2 hide-scrollbar">
+              {/* RESPONSIVE GRID FOR FILTERS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="min-w-[160px]">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-12"><SelectValue placeholder="Category" /></SelectTrigger>
                   <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name} ({category.count})
-                      </SelectItem>
-                    ))}
+                    {categories.map(category => (<SelectItem key={category.id} value={category.id}>{category.name} ({category.count})</SelectItem>))}
                   </SelectContent>
                 </Select>
                 <Select value={priceFilter} onValueChange={setPriceFilter}>
-                  <SelectTrigger className="min-w-[140px]">
-                    <SelectValue placeholder="Price Range" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-12"><SelectValue placeholder="Price Range" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Prices</SelectItem>
                     <SelectItem value="free">Free</SelectItem>
@@ -463,9 +429,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
                   </SelectContent>
                 </Select>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="min-w-[140px]">
-                    <SelectValue placeholder="Sort By" />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-12"><SelectValue placeholder="Sort By" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="featured">Featured</SelectItem>
                     <SelectItem value="rating">Highest Rated</SelectItem>
@@ -477,34 +441,19 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
                 </Select>
               </div>
             </div>
-
-            {/* Results Count */}
             <div className="flex items-center justify-between">
-              <p className="text-muted-foreground">
-                Showing {sortedCourses.length} courses
-                {searchQuery && ` for "${searchQuery}"`}
-              </p>
-              
+              <p className="text-muted-foreground">Showing {sortedCourses.length} courses {searchQuery && ` for "${searchQuery}"`}</p>
               {(searchQuery || selectedCategory !== 'all' || priceFilter !== 'all' || levelFilter !== 'all') && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setPriceFilter('all');
-                    setLevelFilter('all');
-                  }}
-                >
+                <Button variant="outline" size="sm" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setPriceFilter('all'); setLevelFilter('all'); }}>
                   Clear Filters
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Course Grid */}
           {sortedCourses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             // ADDED XL GRID FOR WIDE SCREENS
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedCourses.map((course, index) => (
                 <CourseCard key={course.id} course={course} index={index} />
               ))}
@@ -514,18 +463,8 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
               <CardContent>
                 <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No courses found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Try adjusting your search or filter criteria
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('all');
-                    setPriceFilter('all');
-                    setLevelFilter('all');
-                  }}
-                >
+                <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria</p>
+                <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setPriceFilter('all'); setLevelFilter('all'); }}>
                   Reset Filters
                 </Button>
               </CardContent>
@@ -543,24 +482,15 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-bold mb-4">Ready to Start Learning?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Learning?</h2>
             <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
               Join thousands of African professionals and entrepreneurs who are advancing their careers with our expert-led courses.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                variant="secondary"
-                className="text-primary"
-                onClick={() => onNavigate('auth')}
-              >
+              <Button size="lg" variant="secondary" className="text-primary" onClick={() => onNavigate('auth')}>
                 Create Free Account
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-primary"
-              >
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
                 Explore Free Courses
               </Button>
             </div>
