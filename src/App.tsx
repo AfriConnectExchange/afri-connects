@@ -37,6 +37,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [cookiePreferences, setCookiePreferences] = useState<any>(null);
+  const [forceShowCookies, setForceShowCookies] = useState(false);
 
   // Simulate initial app loading and check for first-time user
   useEffect(() => {
@@ -47,9 +48,21 @@ export default function App() {
         
         // Check if user has seen onboarding before
         const hasSeenOnboarding = localStorage.getItem('africonnect-onboarding-completed');
-        if (!hasSeenOnboarding) {
+  // Read simulation flags from URL query params (e.g., ?simulateOnboarding=1 or ?simulateCookies=1)
+  const params = new URLSearchParams(window.location.search);
+        const simulateOnboarding = params.get('simulateOnboarding') === '1';
+        const simulateCookies = params.get('simulateCookies') === '1';
+
+        if (simulateOnboarding) {
           setIsFirstTimeUser(true);
           setShowOnboarding(true);
+        } else if (!hasSeenOnboarding) {
+          setIsFirstTimeUser(true);
+          setShowOnboarding(true);
+        }
+
+        if (simulateCookies) {
+          setForceShowCookies(true);
         }
       } catch (error) {
         console.warn('App initialization warning:', error);
@@ -310,12 +323,12 @@ export default function App() {
           
           {/* Onboarding Walkthrough */}
           <ErrorBoundary fallback={SimpleErrorFallback}>
-            <OnboardingWalkthrough
-              isOpen={showOnboarding}
-              onClose={handleOnboardingClose}
-              onComplete={handleOnboardingComplete}
-              onNavigate={handleNavigate}
-            />
+              <OnboardingWalkthrough
+                isOpen={showOnboarding}
+                onClose={handleOnboardingClose}
+                onComplete={handleOnboardingComplete}
+                onNavigate={handleNavigate}
+              />
           </ErrorBoundary>
 
           {/* Cookie Consent */}
@@ -323,6 +336,7 @@ export default function App() {
             <CookieConsent
               onAccept={handleCookieAccept}
               onDecline={handleCookieDecline}
+              forceOpen={forceShowCookies}
             />
           </ErrorBoundary>
           

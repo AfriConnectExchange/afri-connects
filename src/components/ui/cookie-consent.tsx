@@ -18,6 +18,8 @@ import {
 interface CookieConsentProps {
   onAccept: (preferences: CookiePreferences) => void;
   onDecline: () => void;
+  /** When true, forces the consent UI to appear regardless of localStorage */
+  forceOpen?: boolean;
 }
 
 interface CookiePreferences {
@@ -27,7 +29,7 @@ interface CookiePreferences {
   preferences: boolean;
 }
 
-export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
+export function CookieConsent({ onAccept, onDecline, forceOpen }: CookieConsentProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
     necessary: true,
@@ -38,11 +40,15 @@ export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
 
   useEffect(() => {
     const consentGiven = localStorage.getItem('africonnect-cookie-consent');
+    if (forceOpen) {
+      setIsVisible(true);
+      return;
+    }
     if (!consentGiven) {
       const timer = setTimeout(() => setIsVisible(true), 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [forceOpen]);
 
   const handleAcceptAll = () => {
     const allAccepted: CookiePreferences = { necessary: true, analytics: true, marketing: true, preferences: true };

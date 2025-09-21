@@ -5,23 +5,17 @@ interface FooterProps {
   onNavigate: (page: string) => void;
 }
 
-// Placeholder component for the App Store button SVG
+// App Store badge (from public folder)
 const AppStoreButton = () => (
-  <a href="#" className="inline-block">
-    <svg width="120" height="40" viewBox="0 0 120 40" className="fill-current" aria-label="Download on the App Store">
-      <rect width="120" height="40" rx="5" fill="#000"/>
-      <text x="30" y="25" fontFamily="Arial, sans-serif" fontSize="12" fill="#fff">App Store</text>
-    </svg>
+  <a href="#" className="inline-block" aria-label="Download on the App Store">
+    <img src="/app-store-badge.png" alt="Download on the App Store" className="h-10 object-contain" />
   </a>
 );
 
-// Placeholder component for the Google Play button SVG
+// Google Play badge (from public folder)
 const GooglePlayButton = () => (
-  <a href="#" className="inline-block">
-    <svg width="135" height="40" viewBox="0 0 135 40" className="fill-current" aria-label="Get it on Google Play">
-      <rect width="135" height="40" rx="5" fill="#000"/>
-      <text x="35" y="25" fontFamily="Arial, sans-serif" fontSize="12" fill="#fff">Google Play</text>
-    </svg>
+  <a href="#" className="inline-block" aria-label="Get it on Google Play">
+    <img src="/playstore-badge.png" alt="Get it on Google Play" className="h-12 object-contain" />
   </a>
 );
 
