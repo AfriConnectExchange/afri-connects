@@ -14,7 +14,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 1,
       name: "Traditional Kente Cloth",
-      price: "₦45,000",
+  price: "£45,000",
       rating: 4.8,
       reviews: 124,
       seller: "Accra Crafts",
@@ -23,7 +23,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 2,
       name: "Handcrafted Wooden Sculpture",
-      price: "₦28,500",
+  price: "£28,500",
       rating: 4.9,
       reviews: 89,
       seller: "Lagos Artisans",
@@ -32,7 +32,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 3,
       name: "African Print Dress",
-      price: "₦15,200",
+  price: "£15,200",
       rating: 4.7,
       reviews: 156,
       seller: "Ankara Fashion",
@@ -41,7 +41,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 4,
       name: "Organic Shea Butter",
-      price: "₦8,500",
+  price: "£8,500",
       rating: 4.6,
       reviews: 203,
       seller: "Natural Beauty Co",
@@ -54,7 +54,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       id: 1,
       title: "Digital Marketing for African Businesses",
       instructor: "Adaora Okafor",
-      price: "₦25,000",
+  price: "£25,000",
       rating: 4.9,
       students: 1240,
       duration: "8 weeks"
@@ -63,7 +63,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       id: 2,
       title: "Traditional Craft Business Setup",
       instructor: "Kwame Asante",
-      price: "₦18,000",
+  price: "£18,000",
       rating: 4.8,
       students: 856,
       duration: "6 weeks"

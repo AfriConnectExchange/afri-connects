@@ -514,11 +514,11 @@ export function KYCPage({ onNavigate }: KYCPageProps) {
                 <SelectValue placeholder="Select volume range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0-50000">₦0 - ₦50,000</SelectItem>
-                <SelectItem value="50000-200000">₦50,000 - ₦200,000</SelectItem>
-                <SelectItem value="200000-500000">₦200,000 - ₦500,000</SelectItem>
-                <SelectItem value="500000-1000000">₦500,000 - ₦1,000,000</SelectItem>
-                <SelectItem value="1000000+">₦1,000,000+</SelectItem>
+                <SelectItem value="0-50000">£0 - £50,000</SelectItem>
+                <SelectItem value="50000-200000">£50,000 - £200,000</SelectItem>
+                <SelectItem value="200000-500000">£200,000 - £500,000</SelectItem>
+                <SelectItem value="500000-1000000">£500,000 - £1,000,000</SelectItem>
+                <SelectItem value="1000000+">£1,000,000+</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -610,7 +610,7 @@ export function KYCPage({ onNavigate }: KYCPageProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => document.getElementById(`file-${document.id}`)?.click()}
+                  onClick={() => window.document.getElementById(`file-${document.id}`)?.click()}
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   Choose File
