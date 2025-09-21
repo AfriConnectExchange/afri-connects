@@ -1,0 +1,39 @@
+/* FILE: src/styles/phone-input.css */
+
+/* This container will mimic the main Input component's style */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  height: 2.5rem; /* 40px, matching shadcn's default input height */
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0 0.75rem; /* Horizontal padding */
+  transition: all 0.2s ease-in-out;
+}
+
+/* Style for when the component is focused */
+.PhoneInput--focus {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+/* This makes the actual <input> field inside the container seamless */
+.PhoneInputInput {
+  flex: 1;
+  border: none;
+  background-color: transparent;
+  outline: none;
+  height: 100%;
+  padding-left: 0.5rem; /* Space between flag and number */
+}
+
+/* Remove default focus styles from the inner input */
+.PhoneInputInput:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.PhoneInputCountry {
+  margin-right: 0.5rem;
+}

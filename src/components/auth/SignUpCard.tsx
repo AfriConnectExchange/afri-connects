@@ -1,9 +1,15 @@
+// FILE: src/components/auth/SignUpCard.tsx
 import React from 'react';
 import { Mail, Phone, Eye, EyeOff } from 'lucide-react';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { AnimatedButton } from '../ui/animated-button';
+
+// 1. Import the new component and its styles
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import '../../styles/phone-input.css'; // Adjust the path if needed
 
 type Props = any;
 
@@ -150,13 +156,15 @@ export default function SignUpCard({
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <Input
+              {/* 2. Replace the old Input with the new PhoneInput component */}
+              <PhoneInput
                 id="phone"
-                type="tel"
-                placeholder="+44 20 1234 5678"
+                placeholder="Enter phone number"
                 value={formData.phone}
-                onChange={e => setFormData((prev: any) => ({ ...prev, phone: e.target.value }))}
-                required
+                onChange={(value) => setFormData((prev: any) => ({ ...prev, phone: value || '' }))}
+                defaultCountry="GB" // Default to United Kingdom
+                international
+                className="h-10 text-sm" // Match height and text size
               />
             </div>
             <div className="flex items-center space-x-2">
