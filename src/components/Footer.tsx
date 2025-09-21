@@ -1,3 +1,4 @@
+// FILE: src/components/Footer.jsx
 import { ArrowRight, Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 

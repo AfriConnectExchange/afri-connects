@@ -1,11 +1,10 @@
+// FILE: src/components/NotificationsPage.tsx
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Bell, Package, TrendingUp, Mail, Settings, Check, X, Trash2, Filter, Search, ShoppingCart, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, Package, TrendingUp, Settings, Check, X, Trash2, Search, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
@@ -32,14 +31,14 @@ interface Notification {
   priority: 'high' | 'medium' | 'low';
 }
 
-// Mock notifications data
+// Mock notifications data with dynamic timestamps
 const mockNotifications: Notification[] = [
   {
     id: '1',
     type: 'order',
     title: 'Order Confirmed',
     message: 'Your order #AC12345 has been confirmed by the seller. Estimated delivery: 3-5 business days.',
-    timestamp: '2024-01-20T10:30:00Z',
+    timestamp: new Date().toISOString(), // Today
     read: false,
     icon: Package,
     priority: 'high',
@@ -53,7 +52,7 @@ const mockNotifications: Notification[] = [
     type: 'delivery',
     title: 'Package Delivered',
     message: 'Your order #AC12344 has been successfully delivered to your address. Please confirm receipt.',
-    timestamp: '2024-01-20T09:15:00Z',
+    timestamp: new Date(new Date().setHours(new Date().getHours() - 5)).toISOString(), // Today
     read: false,
     icon: CheckCircle,
     priority: 'high',
@@ -66,8 +65,8 @@ const mockNotifications: Notification[] = [
     id: '3',
     type: 'promotion',
     title: 'Special Offer: 20% Off African Textiles',
-    message: 'Limited time offer on premium African fabrics and textiles. Valid until January 31st.',
-    timestamp: '2024-01-20T08:00:00Z',
+    message: 'Limited time offer on premium African fabrics and textiles. Valid until the end of the month.',
+    timestamp: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), // This Week
     read: true,
     icon: TrendingUp,
     priority: 'medium',
@@ -81,7 +80,7 @@ const mockNotifications: Notification[] = [
     type: 'order',
     title: 'Payment Required',
     message: 'Your order #AC12346 is waiting for payment. Complete payment to proceed with shipping.',
-    timestamp: '2024-01-19T16:45:00Z',
+    timestamp: new Date(new Date().setDate(new Date().getDate() - 4)).toISOString(), // This Week
     read: true,
     icon: AlertCircle,
     priority: 'high',
@@ -95,7 +94,7 @@ const mockNotifications: Notification[] = [
     type: 'system',
     title: 'Profile Verification Complete',
     message: 'Your seller profile has been verified. You can now list products and accept orders.',
-    timestamp: '2024-01-19T14:20:00Z',
+    timestamp: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(), // Earlier
     read: true,
     icon: User,
     priority: 'medium'
@@ -105,7 +104,7 @@ const mockNotifications: Notification[] = [
     type: 'delivery',
     title: 'Delivery Attempted',
     message: 'Delivery attempt failed for order #AC12343. The package will be redelivered tomorrow.',
-    timestamp: '2024-01-19T11:30:00Z',
+    timestamp: new Date(new Date().setDate(new Date().getDate() - 8)).toISOString(), // Earlier
     read: true,
     icon: Package,
     priority: 'medium',
@@ -116,7 +115,6 @@ const mockNotifications: Notification[] = [
   }
 ];
 
-const notificationTypes = ['all', 'order', 'delivery', 'promotion', 'system'];
 
 export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
@@ -153,18 +151,46 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
   const filteredNotifications = notifications.filter(notification => {
     const matchesTab = activeTab === 'all' || notification.type === activeTab;
     const matchesSearch = notification.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         notification.message.toLowerCase().includes(searchQuery.toLowerCase());
+      notification.message.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
+  const groupNotificationsByTime = (notifications: Notification[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    const groups = {
+      Today: [] as Notification[],
+      "This Week": [] as Notification[],
+      Earlier: [] as Notification[],
+    };
+
+    notifications.forEach(notification => {
+      const notificationDate = new Date(notification.timestamp);
+      if (notificationDate >= today) {
+        groups.Today.push(notification);
+      } else if (notificationDate >= startOfWeek) {
+        groups["This Week"].push(notification);
+      } else {
+        groups.Earlier.push(notification);
+      }
+    });
+
+    return groups;
+  };
+  
+  const groupedNotifications = groupNotificationsByTime(filteredNotifications);
+
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(n => ({ ...n, read: true }))
     );
     showAlert('success', 'All Read', 'All notifications have been marked as read.');
@@ -172,7 +198,7 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
 
   const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
-    showAlert('success', 'Deleted', 'Notification has been deleted.');
+    showAlert('info', 'Deleted', 'Notification has been deleted.');
   };
 
   const clearAllNotifications = () => {
@@ -180,41 +206,36 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
     showAlert('success', 'Cleared', 'All notifications have been cleared.');
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeStyles = (type: Notification['type']) => {
     switch (type) {
-      case 'order': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'delivery': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'promotion': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'system': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'order': return { bg: 'bg-blue-100', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-800 border-blue-200' };
+      case 'delivery': return { bg: 'bg-emerald-100', text: 'text-emerald-600', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+      case 'promotion': return { bg: 'bg-purple-100', text: 'text-purple-600', badge: 'bg-purple-100 text-purple-800 border-purple-200' };
+      case 'system': return { bg: 'bg-gray-100', text: 'text-gray-600', badge: 'bg-gray-100 text-gray-800 border-gray-200' };
+      default: return { bg: 'bg-gray-100', text: 'text-gray-600', badge: 'bg-gray-100 text-gray-800 border-gray-200' };
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: Notification['priority']) => {
     switch (priority) {
-      case 'high': return 'border-l-red-500';
-      case 'medium': return 'border-l-amber-500';
-      case 'low': return 'border-l-green-500';
-      default: return 'border-l-gray-300';
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-amber-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-400';
     }
   };
-
+  
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffHours < 1) return 'Just now';
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffHours < 48) return 'Yesterday';
-    return date.toLocaleDateString();
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
+
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-6">
+      <div className="border-b border-border bg-card sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4 md:py-6">
           <div className="flex items-center justify-between">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -224,40 +245,32 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
               <div className="relative">
                 <Bell className="w-8 h-8 text-primary" />
                 {unreadCount > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 text-xs min-w-[20px] h-5">
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 text-xs min-w-[20px] h-5 flex items-center justify-center">
                     {unreadCount}
                   </Badge>
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-                <p className="text-muted-foreground">
-                  {unreadCount > 0 ? `${unreadCount} unread messages` : 'All caught up!'}
+                <h1 className="text-xl md:text-2xl font-bold text-foreground">Notifications</h1>
+                <p className="text-sm text-muted-foreground">
+                  {unreadCount > 0 ? `${unreadCount} unread messages` : 'You are all caught up!'}
                 </p>
               </div>
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2"
             >
               {unreadCount > 0 && (
-                <AnimatedButton
-                  onClick={markAllAsRead}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Mark All Read
+                <AnimatedButton onClick={markAllAsRead} variant="outline" size="sm">
+                  <Check className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Mark All Read</span>
                 </AnimatedButton>
               )}
-              <AnimatedButton
-                onClick={() => setShowSettings(true)}
-                variant="outline"
-                size="sm"
-              >
-                <Settings className="w-4 h-4" />
+              <AnimatedButton onClick={() => setShowSettings(true)} variant="ghost" size="icon">
+                <Settings className="w-5 h-5" />
               </AnimatedButton>
             </motion.div>
           </div>
@@ -267,7 +280,7 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
       <div className="container mx-auto px-4 py-8">
         {/* Search and Filters */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col md:flex-row gap-4 mb-6"
         >
@@ -280,297 +293,223 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllNotifications}
-              disabled={notifications.length === 0}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear All
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearAllNotifications}
+            disabled={notifications.length === 0}
+            className="text-red-500 border-red-500/50 hover:bg-red-500/10 hover:text-red-600"
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Clear All
+          </Button>
         </motion.div>
 
         {/* Tabs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="mb-6"
         >
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-5 w-full max-w-2xl mb-6">
-              <TabsTrigger value="all">
-                All ({notifications.length})
-              </TabsTrigger>
-              <TabsTrigger value="order">
-                Orders ({notifications.filter(n => n.type === 'order').length})
-              </TabsTrigger>
-              <TabsTrigger value="delivery">
-                Delivery ({notifications.filter(n => n.type === 'delivery').length})
-              </TabsTrigger>
-              <TabsTrigger value="promotion">
-                Offers ({notifications.filter(n => n.type === 'promotion').length})
-              </TabsTrigger>
-              <TabsTrigger value="system">
-                System ({notifications.filter(n => n.type === 'system').length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={activeTab} className="mt-0">
-              <AnimatePresence>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="w-full overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                <TabsList className="inline-flex w-auto">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="order">Orders</TabsTrigger>
+                    <TabsTrigger value="delivery">Delivery</TabsTrigger>
+                    <TabsTrigger value="promotion">Offers</TabsTrigger>
+                    <TabsTrigger value="system">System</TabsTrigger>
+                </TabsList>
+            </div>
+            
+            <TabsContent value={activeTab} className="mt-6">
                 {filteredNotifications.length === 0 ? (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center py-12"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-20"
                   >
                     <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                       <Bell className="w-12 h-12 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">No notifications</h3>
-                    <p className="text-muted-foreground">
-                      {searchQuery 
-                        ? "No notifications match your search." 
-                        : "You're all caught up! No new notifications."
-                      }
+                    <h3 className="text-xl font-semibold mb-2">No Notifications</h3>
+                    <p className="text-muted-foreground max-w-sm mx-auto">
+                      {searchQuery
+                        ? "No notifications match your search query."
+                        : `You have no ${activeTab !== 'all' ? activeTab : ''} notifications.`}
                     </p>
                   </motion.div>
                 ) : (
-                  <div className="space-y-3">
-                    {filteredNotifications.map((notification, index) => {
-                      const Icon = notification.icon;
-                      return (
+                  <AnimatePresence>
+                    {Object.entries(groupedNotifications).map(([group, notificationsInGroup]) =>
+                      notificationsInGroup.length > 0 && (
                         <motion.div
-                          key={notification.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
+                            key={group}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="mb-8"
                         >
-                          <Card 
-                            className={`hover:shadow-md transition-all duration-200 cursor-pointer border-l-4 ${getPriorityColor(notification.priority)} ${
-                              !notification.read ? 'bg-blue-50/30 border-blue-200' : ''
-                            }`}
-                            onClick={() => !notification.read && markAsRead(notification.id)}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-4">
-                                {/* Icon */}
-                                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                                  notification.type === 'order' ? 'bg-blue-100' :
-                                  notification.type === 'delivery' ? 'bg-emerald-100' :
-                                  notification.type === 'promotion' ? 'bg-purple-100' :
-                                  'bg-gray-100'
-                                }`}>
-                                  <Icon className={`w-5 h-5 ${
-                                    notification.type === 'order' ? 'text-blue-600' :
-                                    notification.type === 'delivery' ? 'text-emerald-600' :
-                                    notification.type === 'promotion' ? 'text-purple-600' :
-                                    'text-gray-600'
-                                  }`} />
-                                </div>
+                          <h3 className="text-sm font-semibold text-muted-foreground px-2 mb-3">{group}</h3>
+                          <div className="border rounded-lg overflow-hidden">
+                            {notificationsInGroup.map((notification, index) => {
+                              const Icon = notification.icon;
+                              const typeStyles = getTypeStyles(notification.type);
+                              return (
+                                <motion.div
+                                  key={notification.id}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: index * 0.05 }}
+                                  className={`relative flex items-start gap-4 p-4 transition-colors duration-200 cursor-pointer ${!notification.read ? 'bg-primary/5' : 'bg-transparent'} ${index !== notificationsInGroup.length - 1 ? 'border-b' : ''} hover:bg-muted/50`}
+                                  onClick={() => !notification.read && markAsRead(notification.id)}
+                                >
+                                  {!notification.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>}
+                                  
+                                  <div className="flex-shrink-0 flex flex-col items-center gap-2 pt-1">
+                                    <div className={`w-2 h-2 rounded-full ${getPriorityColor(notification.priority)}`}></div>
+                                  </div>
 
-                                {/* Content */}
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2 flex-wrap">
+                                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${typeStyles.bg}`}>
+                                    <Icon className={`w-5 h-5 ${typeStyles.text}`} />
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between mb-1">
                                       <h3 className={`font-semibold text-sm ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
                                         {notification.title}
                                       </h3>
-                                      <Badge variant="outline" className={`text-xs ${getTypeColor(notification.type)}`}>
-                                        {notification.type}
-                                      </Badge>
-                                      {!notification.read && (
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                      )}
+                                      <div className="flex items-center gap-2 ml-2">
+                                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                          {formatTimestamp(notification.timestamp)}
+                                        </span>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteNotification(notification.id);
+                                          }}
+                                          className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                                        >
+                                          <X className="w-3.5 h-3.5" />
+                                        </Button>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-1 ml-2">
-                                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                        {formatTimestamp(notification.timestamp)}
-                                      </span>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
+                                    
+                                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                                      {notification.message}
+                                    </p>
+
+                                    {notification.action && (
+                                      <AnimatedButton
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          deleteNotification(notification.id);
+                                          notification.action!.onClick();
                                         }}
-                                        className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                                        size="sm"
+                                        variant="secondary"
+                                        className="h-8"
                                       >
-                                        <X className="w-3 h-3" />
-                                      </Button>
-                                    </div>
+                                        {notification.action.label}
+                                      </AnimatedButton>
+                                    )}
                                   </div>
-                                  
-                                  <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-                                    {notification.message}
-                                  </p>
-
-                                  {notification.action && (
-                                    <AnimatedButton
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        notification.action!.onClick();
-                                      }}
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-8"
-                                    >
-                                      {notification.action.label}
-                                    </AnimatedButton>
-                                  )}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
                         </motion.div>
-                      );
-                    })}
-                  </div>
+                      )
+                    )}
+                  </AnimatePresence>
                 )}
-              </AnimatePresence>
             </TabsContent>
           </Tabs>
         </motion.div>
       </div>
 
       {/* Settings Modal */}
-      <CustomModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        title="Notification Settings"
-        description="Configure how and when you receive notifications"
-        size="md"
-      >
-        <div className="space-y-6">
-          <div>
-            <h3 className="font-semibold mb-4">Delivery Channels</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+      <CustomModal isOpen={showSettings} onClose={() => setShowSettings(false)} title="Notification Settings" description="Configure how and when you receive notifications" size="md">
+            <div className="space-y-6 pt-2">
                 <div>
-                  <Label htmlFor="inApp" className="font-medium">In-App Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive notifications within the app</p>
+                    <h3 className="font-semibold mb-4 text-foreground">Delivery Channels</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="inApp" className="font-medium">In-App Notifications</Label>
+                                <p className="text-sm text-muted-foreground">Receive notifications within the app</p>
+                            </div>
+                            <Switch id="inApp" checked={notificationSettings.inApp} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, inApp: checked }))} />
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="email" className="font-medium">Email Notifications</Label>
+                                <p className="text-sm text-muted-foreground">Receive notifications via email</p>
+                            </div>
+                            <Switch id="email" checked={notificationSettings.email} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, email: checked }))} />
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="sms" className="font-medium">SMS Notifications</Label>
+                                <p className="text-sm text-muted-foreground">Receive important updates via SMS</p>
+                            </div>
+                            <Switch id="sms" checked={notificationSettings.sms} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, sms: checked }))} />
+                        </div>
+                    </div>
                 </div>
-                <Switch
-                  id="inApp"
-                  checked={notificationSettings.inApp}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, inApp: checked }))
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="email" className="font-medium">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive notifications via email</p>
-                </div>
-                <Switch
-                  id="email"
-                  checked={notificationSettings.email}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, email: checked }))
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="sms" className="font-medium">SMS Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive important updates via SMS</p>
-                </div>
-                <Switch
-                  id="sms"
-                  checked={notificationSettings.sms}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, sms: checked }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Notification Types</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="orderUpdates" className="font-medium">Order Updates</Label>
-                  <p className="text-sm text-muted-foreground">Order confirmations, shipping updates</p>
+                    <h3 className="font-semibold mb-4 text-foreground">Notification Types</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                           <div>
+                                <Label htmlFor="orderUpdates" className="font-medium">Order Updates</Label>
+                                <p className="text-sm text-muted-foreground">Order confirmations, shipping updates</p>
+                           </div>
+                           <Switch id="orderUpdates" checked={notificationSettings.orderUpdates} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, orderUpdates: checked }))} />
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="deliveryAlerts" className="font-medium">Delivery Alerts</Label>
+                                <p className="text-sm text-muted-foreground">Delivery attempts, confirmations</p>
+                            </div>
+                           <Switch id="deliveryAlerts" checked={notificationSettings.deliveryAlerts} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, deliveryAlerts: checked }))} />
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="promotions" className="font-medium">Promotional Offers</Label>
+                                <p className="text-sm text-muted-foreground">Special offers, discounts, campaigns</p>
+                            </div>
+                            <Switch id="promotions" checked={notificationSettings.promotions} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, promotions: checked }))} />
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                            <div>
+                                <Label htmlFor="systemAlerts" className="font-medium">System Alerts</Label>
+                                <p className="text-sm text-muted-foreground">Account updates, security alerts</p>
+                            </div>
+                            <Switch id="systemAlerts" checked={notificationSettings.systemAlerts} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, systemAlerts: checked }))} />
+                        </div>
+                    </div>
                 </div>
-                <Switch
-                  id="orderUpdates"
-                  checked={notificationSettings.orderUpdates}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, orderUpdates: checked }))
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="deliveryAlerts" className="font-medium">Delivery Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Delivery attempts, confirmations</p>
-                </div>
-                <Switch
-                  id="deliveryAlerts"
-                  checked={notificationSettings.deliveryAlerts}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, deliveryAlerts: checked }))
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="promotions" className="font-medium">Promotional Offers</Label>
-                  <p className="text-sm text-muted-foreground">Special offers, discounts, campaigns</p>
-                </div>
-                <Switch
-                  id="promotions"
-                  checked={notificationSettings.promotions}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, promotions: checked }))
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="systemAlerts" className="font-medium">System Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Account updates, security alerts</p>
-                </div>
-                <Switch
-                  id="systemAlerts"
-                  checked={notificationSettings.systemAlerts}
-                  onCheckedChange={(checked) => 
-                    setNotificationSettings(prev => ({ ...prev, systemAlerts: checked }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="flex gap-3 pt-4 border-t">
-            <AnimatedButton
-              onClick={() => {
-                showAlert('success', 'Settings Saved', 'Your notification preferences have been updated.');
-                setShowSettings(false);
-              }}
-              className="flex-1"
-            >
-              Save Settings
-            </AnimatedButton>
-            <Button
-              variant="outline"
-              onClick={() => setShowSettings(false)}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </CustomModal>
+                <div className="flex gap-3 pt-4 border-t">
+                    <AnimatedButton
+                        onClick={() => {
+                            showAlert('success', 'Settings Saved', 'Your notification preferences have been updated.');
+                            setShowSettings(false);
+                        }}
+                        className="flex-1"
+                    >
+                        Save Settings
+                    </AnimatedButton>
+                    <Button variant="outline" onClick={() => setShowSettings(false)}>
+                        Cancel
+                    </Button>
+                </div>
+            </div>
+        </CustomModal>
+
 
       {/* Custom Alert */}
       <CustomAlert
@@ -579,7 +518,7 @@ export function NotificationsPage({ onNavigate }: NotificationsPageProps) {
         type={alertState.type}
         title={alertState.title}
         message={alertState.message}
-        autoClose={alertState.type === 'success'}
+        autoClose={alertState.type !== 'error'}
       />
     </div>
   );
