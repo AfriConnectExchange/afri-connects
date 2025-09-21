@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
+import { Footer } from './components/Footer'; // Import the new Footer
 import { HomePage } from './components/HomePage';
 import { AuthPage } from './components/AuthPage';
 import { MarketplacePage } from './components/MarketplacePage';
@@ -73,9 +74,12 @@ export default function App() {
     // Use requestAnimationFrame for smoother transitions
     requestAnimationFrame(() => {
       setTimeout(() => {
+        window.scrollTo(0, 0); // Scroll to top on page change
         setCurrentPage(page);
         if (productId) {
           setSelectedProductId(productId);
+        } else {
+          setSelectedProductId(null);
         }
         setIsPageTransitioning(false);
       }, 200); // Reduced delay
@@ -127,7 +131,7 @@ export default function App() {
 
   const renderPage = () => {
     if (isPageTransitioning) {
-      return <PageLoader />;
+      return <div className="min-h-screen"><PageLoader /></div>;
     }
 
     try {
@@ -291,7 +295,7 @@ export default function App() {
       }}
     >
       <AuthProvider>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background flex flex-col">
           <ErrorBoundary fallback={SimpleErrorFallback}>
             <Header 
               currentPage={currentPage}
@@ -300,7 +304,9 @@ export default function App() {
             />
           </ErrorBoundary>
           
-          {renderPage()}
+          <main className="flex-grow">
+            {renderPage()}
+          </main>
           
           {/* Onboarding Walkthrough */}
           <ErrorBoundary fallback={SimpleErrorFallback}>
@@ -318,6 +324,11 @@ export default function App() {
               onAccept={handleCookieAccept}
               onDecline={handleCookieDecline}
             />
+          </ErrorBoundary>
+          
+          {/* NEW: Added the Footer component */}
+          <ErrorBoundary fallback={SimpleErrorFallback}>
+            <Footer onNavigate={handleNavigate} />
           </ErrorBoundary>
         </div>
       </AuthProvider>

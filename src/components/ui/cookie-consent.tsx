@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Cookie, X, Shield, Eye, Settings } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Cookie, X, ShieldCheck, Settings, Info } from 'lucide-react';
 import { Button } from './button';
-import { Card, CardContent } from './card';
-import { Badge } from './badge';
 import { Separator } from './separator';
 import { Switch } from './switch';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from './dialog';
 
 interface CookieConsentProps {
   onAccept: (preferences: CookiePreferences) => void;
@@ -20,63 +27,47 @@ interface CookiePreferences {
   preferences: boolean;
 }
 
-const DEFAULT_PREFERENCES: CookiePreferences = {
-  necessary: true, // Always true, cannot be disabled
-  analytics: false,
-  marketing: false,
-  preferences: false
-};
-
 export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<CookiePreferences>({
+    necessary: true,
+    analytics: false,
+    marketing: false,
+    preferences: false
+  });
 
   useEffect(() => {
-    // Check if user has already made a choice
     const consentGiven = localStorage.getItem('africonnect-cookie-consent');
     if (!consentGiven) {
-      // Show banner after a small delay
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 2000);
+      const timer = setTimeout(() => setIsVisible(true), 2000);
       return () => clearTimeout(timer);
     }
   }, []);
 
   const handleAcceptAll = () => {
-    const allAccepted: CookiePreferences = {
-      necessary: true,
-      analytics: true,
-      marketing: true,
-      preferences: true
-    };
-    setPreferences(allAccepted);
-    onAccept(allAccepted);
-    setIsVisible(false);
-    localStorage.setItem('africonnect-cookie-consent', JSON.stringify(allAccepted));
-  };
-
-  const handleAcceptSelected = () => {
-    onAccept(preferences);
-    setIsVisible(false);
-    localStorage.setItem('africonnect-cookie-consent', JSON.stringify(preferences));
+    const allAccepted: CookiePreferences = { necessary: true, analytics: true, marketing: true, preferences: true };
+    finalizeConsent(allAccepted);
   };
 
   const handleDeclineAll = () => {
-    const minimalPreferences: CookiePreferences = {
-      necessary: true,
-      analytics: false,
-      marketing: false,
-      preferences: false
-    };
+    const onlyNecessary: CookiePreferences = { necessary: true, analytics: false, marketing: false, preferences: false };
     onDecline();
-    setIsVisible(false);
-    localStorage.setItem('africonnect-cookie-consent', JSON.stringify(minimalPreferences));
+    finalizeConsent(onlyNecessary, false);
+  };
+  
+  const handleAcceptSelected = () => {
+    finalizeConsent(preferences);
   };
 
-  const updatePreference = (key: keyof CookiePreferences, value: boolean) => {
-    if (key === 'necessary') return; // Cannot disable necessary cookies
+  const finalizeConsent = (finalPreferences: CookiePreferences, wasAccepted: boolean = true) => {
+    if (wasAccepted) {
+      onAccept(finalPreferences);
+    }
+    setIsVisible(false);
+    localStorage.setItem('africonnect-cookie-consent', JSON.stringify(finalPreferences));
+  };
+  
+  const updatePreference = (key: keyof Omit<CookiePreferences, 'necessary'>, value: boolean) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
   };
 
@@ -84,203 +75,109 @@ export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/95 backdrop-blur-sm border-t border-border"
-      >
-        <div className="container mx-auto max-w-6xl">
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              {!showDetails ? (
-                // Simple Banner
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Cookie className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-1">We value your privacy</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. 
-                        By clicking "Accept All", you consent to our use of cookies.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowDetails(true)}
-                      className="gap-2"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Customize
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDeclineAll}
-                    >
-                      Decline All
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleAcceptAll}
-                      className="gap-2"
-                    >
-                      <Shield className="w-4 h-4" />
-                      Accept All
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // Detailed Settings
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Cookie className="w-6 h-6 text-primary" />
-                      <div>
-                        <h3 className="font-medium">Cookie Preferences</h3>
-                        <p className="text-sm text-muted-foreground">Choose which cookies you want to accept</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowDetails(false)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+      <Dialog>
+        {/* Floating Banner */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 20, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="fixed bottom-4 left-4 z-50 w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background/80 p-5 shadow-2xl backdrop-blur-lg md:w-full"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <Cookie className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold">We Use Cookies</h3>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            Our website uses cookies to enhance your experience and analyze traffic. You can choose to accept all cookies or customize your settings.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={handleAcceptAll} className="w-full sm:w-auto flex-1">Accept All</Button>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto">Customize</Button>
+            </DialogTrigger>
+          </div>
+        </motion.div>
 
-                  <div className="grid gap-4">
-                    {/* Necessary Cookies */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-medium">Necessary Cookies</h4>
-                          <Badge variant="secondary" className="text-xs">Required</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Essential for the website to function properly. These cannot be disabled.
-                        </p>
-                      </div>
-                      <Switch checked={true} disabled />
-                    </div>
-
-                    {/* Analytics Cookies */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-2">Analytics Cookies</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Help us understand how visitors interact with our website by collecting information anonymously.
-                        </p>
-                      </div>
-                      <Switch
-                        checked={preferences.analytics}
-                        onCheckedChange={(checked) => updatePreference('analytics', checked)}
-                      />
-                    </div>
-
-                    {/* Marketing Cookies */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-2">Marketing Cookies</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Used to deliver personalized advertisements and measure the effectiveness of advertising campaigns.
-                        </p>
-                      </div>
-                      <Switch
-                        checked={preferences.marketing}
-                        onCheckedChange={(checked) => updatePreference('marketing', checked)}
-                      />
-                    </div>
-
-                    {/* Preference Cookies */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-2">Preference Cookies</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Remember your preferences and settings to provide a more personalized experience.
-                        </p>
-                      </div>
-                      <Switch
-                        checked={preferences.preferences}
-                        onCheckedChange={(checked) => updatePreference('preferences', checked)}
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex flex-col sm:flex-row gap-3 justify-between">
-                    <div className="flex gap-3">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Eye className="w-4 h-4" />
-                            Privacy Policy
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Privacy Policy</DialogTitle>
-                            <DialogDescription>
-                              How we collect, use, and protect your information
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4 text-sm">
-                            <div>
-                              <h4 className="font-medium mb-2">Information We Collect</h4>
-                              <p className="text-muted-foreground">
-                                We collect information you provide directly to us, information we obtain automatically when you use our services, 
-                                and information from third parties.
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium mb-2">How We Use Your Information</h4>
-                              <p className="text-muted-foreground">
-                                We use the information we collect to provide, maintain, and improve our services, process transactions, 
-                                send communications, and comply with legal requirements.
-                              </p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium mb-2">Data Security</h4>
-                              <p className="text-muted-foreground">
-                                We implement appropriate technical and organizational measures to protect your personal data against 
-                                unauthorized access, alteration, disclosure, or destruction.
-                              </p>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                    
-                    <div className="flex gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleDeclineAll}
-                      >
-                        Decline All
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleAcceptSelected}
-                      >
-                        Save Preferences
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </motion.div>
+        {/* Customization Dialog */}
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Customize Your Cookie Preferences</DialogTitle>
+            <DialogDescription>
+              Choose which types of cookies you want to enable. Necessary cookies are required for the site to function.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <CookieCategory
+              icon={ShieldCheck}
+              title="Necessary Cookies"
+              description="These are essential for the website to function and cannot be disabled."
+              switchProps={{ checked: true, disabled: true }}
+            />
+            <CookieCategory
+              icon={Info}
+              title="Analytics Cookies"
+              description="Help us understand how you use our site to improve performance."
+              switchProps={{ 
+                checked: preferences.analytics, 
+                onCheckedChange: (checked) => updatePreference('analytics', checked) 
+              }}
+            />
+            <CookieCategory
+              icon={Settings}
+              title="Preference Cookies"
+              description="Remember your settings and preferences for a more personalized experience."
+              switchProps={{ 
+                checked: preferences.preferences, 
+                onCheckedChange: (checked) => updatePreference('preferences', checked) 
+              }}
+            />
+            <CookieCategory
+              icon={Cookie}
+              title="Marketing Cookies"
+              description="Used to deliver relevant ads and measure the effectiveness of campaigns."
+              switchProps={{ 
+                checked: preferences.marketing, 
+                onCheckedChange: (checked) => updatePreference('marketing', checked) 
+              }}
+            />
+          </div>
+          <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between w-full">
+            <DialogClose asChild>
+                <Button variant="outline" onClick={handleDeclineAll}>Decline All</Button>
+            </DialogClose>
+            <div className="flex gap-2 mb-2 sm:mb-0">
+                <DialogClose asChild>
+                    <Button variant="secondary" onClick={handleAcceptSelected}>Save Preferences</Button>
+                </DialogClose>
+                <DialogClose asChild>
+                    <Button onClick={handleAcceptAll}>Accept All</Button>
+                </DialogClose>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AnimatePresence>
   );
+}
+
+// Helper component for cleaner code in the dialog
+function CookieCategory({ icon: Icon, title, description, switchProps }: {
+  icon: React.ElementType,
+  title: string,
+  description: string,
+  switchProps: React.ComponentProps<typeof Switch>
+}) {
+  return (
+    <div className="flex items-start justify-between rounded-lg border p-4">
+      <div className="flex items-start gap-4 pr-4">
+        <Icon className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
+        <div>
+          <h4 className="font-semibold">{title}</h4>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <Switch {...switchProps} />
+    </div>
+  )
 }

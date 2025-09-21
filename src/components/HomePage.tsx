@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -81,19 +81,19 @@ export function HomePage({ onNavigate }: HomePageProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="mb-4 md:mb-6 text-2xl md:text-4xl lg:text-5xl leading-tight">
+              <h1 className="mb-4 md:mb-6 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                 Connect, Trade & Thrive Across Africa
               </h1>
               <p className="mb-6 md:mb-8 text-base md:text-lg opacity-90 leading-relaxed">
                 Your trusted marketplace for authentic African products, skills training, 
                 and seamless money transfers. Built by Africans, for Africa.
               </p>
-              <div className="flex flex-row gap-3 md:gap-4 justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-start">
                 <Button 
                   size="lg" 
                   variant="secondary"
                   onClick={() => onNavigate('marketplace')}
-                  className="text-primary"
+                  className="text-primary w-full sm:w-auto"
                 >
                   Explore Marketplace
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -101,7 +101,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200"
+                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200 w-full sm:w-auto"
                   onClick={() => onNavigate('auth')}
                 >
                   Start Selling
@@ -120,7 +120,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 className="rounded-lg shadow-2xl w-full h-auto max-h-[400px] object-cover"
               />
               {/* Video play button overlay for demo */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
                 <Button
                   size="lg"
                   variant="secondary"
@@ -217,7 +217,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300">
+                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300" onClick={() => onNavigate('product')}>
                   <CardContent className="p-0">
                     <div className="relative overflow-hidden rounded-t-lg">
                       <ImageWithFallback
@@ -238,8 +238,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       </div>
                       <p className="text-xs md:text-sm text-muted-foreground mb-2">by {product.seller}</p>
                       <p className="text-base md:text-lg font-semibold text-primary">{product.price}</p>
-                      <p className="text-xs text-muted-foreground mt-2">High quality, authentic product from Africa.</p>
-                        {/* Removed 'View Details' button as requested */}
                     </div>
                   </CardContent>
                 </Card>
@@ -272,7 +270,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300">
+                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300" onClick={() => onNavigate('courses')}>
                   <CardContent className="p-4 md:p-6">
                     <div className="flex justify-between items-start mb-4">
                       <Badge variant="secondary" className="text-xs">{course.duration}</Badge>
@@ -283,14 +281,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     </div>
                     <h3 className="mb-2 text-sm md:text-base line-clamp-2">{course.title}</h3>
                     <p className="text-xs md:text-sm text-muted-foreground mb-4">by {course.instructor}</p>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center">
                       <span className="text-xs md:text-sm text-muted-foreground">{course.students} students</span>
                       <span className="text-base md:text-lg font-semibold text-primary">{course.price}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Learn practical skills for African business success.</p>
-                    <Button size="sm" className="w-full" onClick={() => onNavigate('courses')}>
-                      View Course
-                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
