@@ -345,16 +345,16 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
+  <div className="container mx-auto px-3 py-4 md:py-8 relative">
       {/* Page Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="mb-2 text-2xl md:text-3xl font-bold">African Marketplace</h1>
-        <p className="text-muted-foreground">
+  <div className="mb-6 md:mb-8">
+        <h1 className="mb-1 text-xl md:text-3xl font-bold">African Marketplace</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
           Discover authentic African products from verified sellers across the continent
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6 md:gap-8">
+  <div className="grid lg:grid-cols-4 gap-4 md:gap-8">
         {/* Desktop Filters Sidebar */}
         <div className="hidden lg:block lg:col-span-1">
           <div className="sticky top-6">
@@ -370,9 +370,9 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
-          {/* Mobile Search Bar */}
-          <div className="lg:hidden mb-4">
+  <div className="lg:col-span-3 relative">
+          {/* Sticky Mobile Search Bar */}
+          <div className="lg:hidden sticky top-0 z-30 bg-background pt-3 pb-2 mb-3">
             <SearchBar
               value={filters.searchQuery}
               onChange={(value) => handleFiltersChange({ searchQuery: value })}
@@ -380,45 +380,38 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
             />
           </div>
 
-          {/* Mobile Filters Button */}
-          <div className="lg:hidden mb-6">
-            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full">
-                  <SlidersHorizontal className="w-4 h-4 mr-2" />
-                  Filters & Sort
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80 overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6">
-                  <FilterPanel
-                    categories={categories}
-                    filters={filters}
-                    onFiltersChange={handleFiltersChange}
-                    onSearch={handleSearch}
-                    onClearAllFilters={handleClearAllFilters}
-                    currency="£"
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
+          {/* Horizontal Category Chips (Mobile) */}
+          <div className="lg:hidden overflow-x-auto no-scrollbar -mx-3 px-3 pb-3 mb-4">
+            <div className="flex gap-3">
+              {categories.filter(c => c.id !== 'all').map(cat => (
+                <button
+                  key={cat.id}
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors whitespace-nowrap ${
+                    filters.selectedCategories.includes(cat.id)
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-muted text-foreground border-border hover:bg-primary/10'
+                  }`}
+                  onClick={() => handleFiltersChange({ selectedCategories: filters.selectedCategories.includes(cat.id)
+                    ? filters.selectedCategories.filter(id => id !== cat.id)
+                    : [...filters.selectedCategories, cat.id] })}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Results Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <div>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-xs md:text-base">
                 Showing {sortedProducts.length} of {allProducts.length} products
                 {filters.searchQuery && ` for "${filters.searchQuery}"`}
               </p>
               {searchError && (
-                <p className="text-sm text-destructive mt-1">{searchError}</p>
+                <p className="text-xs text-destructive mt-1">{searchError}</p>
               )}
             </div>
-            
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Sort by" />
@@ -442,8 +435,41 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
             currency="£"
             searchQuery={filters.searchQuery}
             noResultsMessage={getNoResultsMessage()}
-            hasMore={false} // Could implement pagination later
+            hasMore={false}
           />
+
+          {/* Sticky Filters & Sort Button (Mobile) */}
+          <div className="lg:hidden fixed bottom-3 left-0 w-full flex justify-center z-40 pointer-events-none">
+            <div className="flex gap-2 pointer-events-auto">
+              <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="rounded-full shadow-lg px-5 py-2">
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filters & Sort
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <FilterPanel
+                      categories={categories}
+                      filters={filters}
+                      onFiltersChange={handleFiltersChange}
+                      onSearch={handleSearch}
+                      onClearAllFilters={handleClearAllFilters}
+                      currency="£"
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+              {/* Floating Cart Button (placeholder) */}
+              <Button className="rounded-full shadow-lg px-4 py-2 bg-primary text-white">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" /><circle cx="7" cy="21" r="1" /><circle cx="20" cy="21" r="1" /></svg>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

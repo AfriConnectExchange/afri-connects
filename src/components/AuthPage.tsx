@@ -42,7 +42,7 @@ const SIMULATION_MODE = true;
 export function AuthPage({ onNavigate }: AuthPageProps) {
   const { user, session } = useAuth();
   const [step, setStep] = useState<AuthFlow>('auth');
-  const [authType, setAuthType] = useState<AuthType>('login');
+  const [showSignIn, setShowSignIn] = useState(true); // true = sign in, false = sign up
   const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -58,6 +58,9 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     title: '',
     message: ''
   });
+
+  // Determine authType based on showSignIn state
+  const authType: AuthType = showSignIn ? 'login' : 'register';
   const [formData, setFormData] = useState<FormData>({
     email: '',
     phone: '',
@@ -446,20 +449,20 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     );
   }
 
-  // Main auth screen with card transitions
+  // Main auth screen with separate cards
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative"
       >
-        {/* Back Button */}
+        {/* Back Button - now inside card, absolutely positioned */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="absolute top-4 left-4 z-10"
         >
           <AnimatedButton
             onClick={() => onNavigate('home')}
@@ -471,281 +474,374 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
           </AnimatedButton>
         </motion.div>
 
-        {/* Main Card */}
-        <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
-          {/* Header */}
-          <div className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="flex items-center justify-center gap-2 mb-4"
-            >
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">AC</span>
-              </div>
-              <span className="text-2xl font-bold text-primary">AfriConnect</span>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <h1 className="text-xl font-semibold mb-2">
-                {authType === 'login' ? 'Welcome Back!' : 'Join AfriConnect'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {authType === 'login' 
-                  ? 'Sign in to continue your journey' 
-                  : 'Connect, trade, and thrive across Africa'
-                }
-              </p>
-            </motion.div>
-          </div>
+        {/* Main Card: Sign In or Sign Up */}
+        {showSignIn ? (
+          <SignInCard
+            authMethod={authMethod}
+            setAuthMethod={setAuthMethod}
+            formData={formData}
+            setFormData={setFormData}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            isLoading={isLoading}
+            simulateEmailLogin={simulateEmailLogin}
+            simulatePhoneAuth={simulatePhoneAuth}
+            showAlert={showAlert}
+            SIMULATION_MODE={SIMULATION_MODE}
+            onSwitch={() => setShowSignIn(false)}
+          />
+        ) : (
+          <SignUpCard
+            authMethod={authMethod}
+            setAuthMethod={setAuthMethod}
+            formData={formData}
+            setFormData={setFormData}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+            showConfirmPassword={showConfirmPassword}
+            setShowConfirmPassword={setShowConfirmPassword}
+            isLoading={isLoading}
+            simulateEmailRegistration={simulateEmailRegistration}
+            simulatePhoneAuth={simulatePhoneAuth}
+            showAlert={showAlert}
+            SIMULATION_MODE={SIMULATION_MODE}
+            onSwitch={() => setShowSignIn(true)}
+          />
+        )}
 
-          {/* Form Content */}
-          <div className="p-8">
-            {/* Auth Type Toggle */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="flex bg-muted rounded-xl p-1 mb-6"
-            >
-              {(['login', 'register'] as AuthType[]).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setAuthType(type)}
-                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    authType === type
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {type === 'login' ? 'Sign In' : 'Sign Up'}
-                </button>
-              ))}
-            </motion.div>
-
-            {/* Method Selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex bg-muted/50 rounded-xl p-1 mb-6"
-            >
-              {(['email', 'phone'] as AuthMethod[]).map((method) => (
-                <button
-                  key={method}
-                  onClick={() => setAuthMethod(method)}
-                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                    authMethod === method
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {method === 'email' ? <Mail className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
-                  {method === 'email' ? 'Email' : 'Phone'}
-                </button>
-              ))}
-            </motion.div>
-
-            {/* Form Fields */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${authType}-${authMethod}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-4"
-              >
-                {/* Email Form */}
-                {authMethod === 'email' && (
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    authType === 'login' ? simulateEmailLogin() : simulateEmailRegistration();
-                  }} className="space-y-4">
-                    {authType === 'register' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                          id="name"
-                          placeholder="Enter your full name"
-                          value={formData.name}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          required
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
-                          value={formData.password}
-                          onChange={(e) => handleInputChange('password', e.target.value)}
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {authType === 'register' && (
-                      <>
-                        <div className="space-y-2">
-                          <Label htmlFor="confirmPassword">Confirm Password</Label>
-                          <div className="relative">
-                            <Input
-                              id="confirmPassword"
-                              type={showConfirmPassword ? "text" : "password"}
-                              placeholder="Confirm your password"
-                              value={formData.confirmPassword}
-                              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                            >
-                              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="terms"
-                            checked={formData.acceptTerms}
-                            onCheckedChange={(checked) => handleInputChange('acceptTerms', checked as boolean)}
-                          />
-                          <Label htmlFor="terms" className="text-sm text-muted-foreground">
-                            I agree to the Terms of Service and Privacy Policy
-                          </Label>
-                        </div>
-                      </>
-                    )}
-
-                    <AnimatedButton
-                      type="submit"
-                      className="w-full mt-6"
-                      isLoading={isLoading}
-                      animationType="glow"
-                    >
-                      {authType === 'login' ? 'Sign In' : 'Create Account'}
-                    </AnimatedButton>
-                  </form>
-                )}
-
-                {/* Phone Form */}
-                {authMethod === 'phone' && (
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    simulatePhoneAuth();
-                  }} className="space-y-4">
-                    {authType === 'register' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="phoneName">Full Name</Label>
-                        <Input
-                          id="phoneName"
-                          placeholder="Enter your full name"
-                          value={formData.name}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          required
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+44 20 1234 5678"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    {authType === 'register' && (
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="phoneTerms"
-                          checked={formData.acceptTerms}
-                          onCheckedChange={(checked) => handleInputChange('acceptTerms', checked as boolean)}
-                        />
-                        <Label htmlFor="phoneTerms" className="text-sm text-muted-foreground">
-                          I agree to the Terms of Service and Privacy Policy
-                        </Label>
-                      </div>
-                    )}
-
-                    <AnimatedButton
-                      type="submit"
-                      className="w-full mt-6"
-                      isLoading={isLoading}
-                      animationType="glow"
-                    >
-                      {authType === 'login' ? 'Send Login Code' : 'Send Verification Code'}
-                    </AnimatedButton>
-                  </form>
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Additional Options */}
-            <div className="mt-6 text-center space-y-2">
-              {SIMULATION_MODE && (
-                <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
-                  <strong>Demo Mode:</strong> Use any email/phone. For OTP, use: 123456
-                </div>
-              )}
-              
-              {authMethod === 'email' && authType === 'login' && (
-                <button
-                  onClick={() => showAlert('info', 'Password Reset', 'Password reset link would be sent to your email.')}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot your password?
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Custom Alert */}
+        <CustomAlert
+          isOpen={alertState.isOpen}
+          onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+          type={alertState.type}
+          title={alertState.title}
+          message={alertState.message}
+          autoClose={alertState.type === 'success'}
+        />
       </motion.div>
-
-      {/* Custom Alert */}
-      <CustomAlert
-        isOpen={alertState.isOpen}
-        onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
-        type={alertState.type}
-        title={alertState.title}
-        message={alertState.message}
-        autoClose={alertState.type === 'success'}
-      />
     </div>
   );
+// --- SignInCard Component ---
+function SignInCard({
+  authMethod,
+  setAuthMethod,
+  formData,
+  setFormData,
+  showPassword,
+  setShowPassword,
+  isLoading,
+  simulateEmailLogin,
+  simulatePhoneAuth,
+  showAlert,
+  SIMULATION_MODE,
+  onSwitch
+}: any) {
+  return (
+    <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
+      <div className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <span className="text-white font-bold text-lg">AC</span>
+          </div>
+          <span className="text-2xl font-bold text-primary">AfriConnect</span>
+        </div>
+        <h1 className="text-xl font-semibold mb-2">Welcome Back!</h1>
+        <p className="text-sm text-muted-foreground">Sign in to continue your journey</p>
+      </div>
+      <div className="p-8">
+        {/* Method Selection */}
+        <div className="flex bg-muted/50 rounded-xl p-1 mb-6">
+          {['email', 'phone'].map((method) => (
+            <button
+              key={method}
+              onClick={() => setAuthMethod(method)}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                authMethod === method
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {method === 'email' ? <Mail className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+              {method === 'email' ? 'Email' : 'Phone'}
+            </button>
+          ))}
+        </div>
+        {/* Form Fields */}
+        {authMethod === 'email' ? (
+          <form onSubmit={e => { e.preventDefault(); simulateEmailLogin(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={e => setFormData((prev: any) => ({ ...prev, email: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={e => setFormData((prev: any) => ({ ...prev, password: e.target.value }))}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v: boolean) => !v)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <AnimatedButton
+              type="submit"
+              className="w-full mt-6"
+              isLoading={isLoading}
+              animationType="glow"
+            >
+              Sign In
+            </AnimatedButton>
+          </form>
+        ) : (
+          <form onSubmit={e => { e.preventDefault(); simulatePhoneAuth(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+44 20 1234 5678"
+                value={formData.phone}
+                onChange={e => setFormData((prev: any) => ({ ...prev, phone: e.target.value }))}
+                required
+              />
+            </div>
+            <AnimatedButton
+              type="submit"
+              className="w-full mt-6"
+              isLoading={isLoading}
+              animationType="glow"
+            >
+              Send Login Code
+            </AnimatedButton>
+          </form>
+        )}
+        {/* Additional Options */}
+        <div className="mt-6 text-center space-y-2">
+          {SIMULATION_MODE && (
+            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
+              <strong>Demo Mode:</strong> Use any email/phone. For OTP, use: 123456
+            </div>
+          )}
+          <button
+            onClick={() => showAlert('info', 'Password Reset', 'Password reset link would be sent to your email.')}
+            className="text-sm text-primary hover:underline"
+          >
+            Forgot your password?
+          </button>
+          <div className="text-sm mt-4">
+            Don't have an account?{' '}
+            <button onClick={onSwitch} className="text-primary hover:underline font-semibold">Sign up</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- SignUpCard Component ---
+function SignUpCard({
+  authMethod,
+  setAuthMethod,
+  formData,
+  setFormData,
+  showPassword,
+  setShowPassword,
+  showConfirmPassword,
+  setShowConfirmPassword,
+  isLoading,
+  simulateEmailRegistration,
+  simulatePhoneAuth,
+  showAlert,
+  SIMULATION_MODE,
+  onSwitch
+}: any) {
+  return (
+    <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
+      <div className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <span className="text-white font-bold text-lg">AC</span>
+          </div>
+          <span className="text-2xl font-bold text-primary">AfriConnect</span>
+        </div>
+        <h1 className="text-xl font-semibold mb-2">Join AfriConnect</h1>
+        <p className="text-sm text-muted-foreground">Connect, trade, and thrive across Africa</p>
+      </div>
+      <div className="p-8">
+        {/* Method Selection */}
+        <div className="flex bg-muted/50 rounded-xl p-1 mb-6">
+          {['email', 'phone'].map((method) => (
+            <button
+              key={method}
+              onClick={() => setAuthMethod(method)}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                authMethod === method
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {method === 'email' ? <Mail className="w-4 h-4" /> : <Phone className="w-4 h-4" />}
+              {method === 'email' ? 'Email' : 'Phone'}
+            </button>
+          ))}
+        </div>
+        {/* Form Fields */}
+        {authMethod === 'email' ? (
+          <form onSubmit={e => { e.preventDefault(); simulateEmailRegistration(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={e => setFormData((prev: any) => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={e => setFormData((prev: any) => ({ ...prev, email: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={e => setFormData((prev: any) => ({ ...prev, password: e.target.value }))}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v: boolean) => !v)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={e => setFormData((prev: any) => ({ ...prev, confirmPassword: e.target.value }))}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v: boolean) => !v)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={formData.acceptTerms}
+                onCheckedChange={checked => setFormData((prev: any) => ({ ...prev, acceptTerms: checked }))}
+              />
+              <Label htmlFor="terms" className="text-sm text-muted-foreground">
+                I agree to the Terms of Service and Privacy Policy
+              </Label>
+            </div>
+            <AnimatedButton
+              type="submit"
+              className="w-full mt-6"
+              isLoading={isLoading}
+              animationType="glow"
+            >
+              Create Account
+            </AnimatedButton>
+          </form>
+        ) : (
+          <form onSubmit={e => { e.preventDefault(); simulatePhoneAuth(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="phoneName">Full Name</Label>
+              <Input
+                id="phoneName"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={e => setFormData((prev: any) => ({ ...prev, name: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+44 20 1234 5678"
+                value={formData.phone}
+                onChange={e => setFormData((prev: any) => ({ ...prev, phone: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="phoneTerms"
+                checked={formData.acceptTerms}
+                onCheckedChange={checked => setFormData((prev: any) => ({ ...prev, acceptTerms: checked }))}
+              />
+              <Label htmlFor="phoneTerms" className="text-sm text-muted-foreground">
+                I agree to the Terms of Service and Privacy Policy
+              </Label>
+            </div>
+            <AnimatedButton
+              type="submit"
+              className="w-full mt-6"
+              isLoading={isLoading}
+              animationType="glow"
+            >
+              Send Verification Code
+            </AnimatedButton>
+          </form>
+        )}
+        {/* Additional Options */}
+        <div className="mt-6 text-center space-y-2">
+          {SIMULATION_MODE && (
+            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
+              <strong>Demo Mode:</strong> Use any email/phone. For OTP, use: 123456
+            </div>
+          )}
+          <div className="text-sm mt-4">
+            Already have an account?{' '}
+            <button onClick={onSwitch} className="text-primary hover:underline font-semibold">Sign in</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 }

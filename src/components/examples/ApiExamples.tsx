@@ -193,10 +193,10 @@ export function ApiExamples() {
             )}
           </div>
 
-          {kycProcess.status && (
+          {kycProcess.status && typeof kycProcess.status === 'object' && 'status' in kycProcess.status && (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-sm text-blue-800">
-                Status: {kycProcess.status.status}
+                Status: {(kycProcess.status as { status: string }).status}
               </p>
             </div>
           )}

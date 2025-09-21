@@ -312,14 +312,15 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
                 )}
               </div>
               
-              <AnimatedButton
-                size="sm"
-                className="gap-1"
+              <button
+                type="button"
                 onClick={() => onNavigate('auth')}
+                className="flex items-center gap-2 px-6 py-2 rounded-full font-bold bg-gradient-to-r from-primary to-primary/80 text-white shadow-xl transition-all duration-300 hover:from-primary/90 hover:to-primary/70 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/60 active:scale-95 border-0 text-base"
+                style={{ boxShadow: '0 4px 16px 0 rgba(0,0,0,0.10)' }}
               >
-                {course.price === 0 ? 'Enroll Free' : 'Enroll Now'}
-                <ChevronRight className="w-3 h-3" />
-              </AnimatedButton>
+                <span>{course.price === 0 ? 'Enroll Free' : 'Enroll Now'}</span>
+                <ChevronRight className="w-5 h-5 ml-1" />
+              </button>
             </div>
           </div>
         </CardContent>
@@ -345,7 +346,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
               Discover skills, knowledge, and opportunities with courses designed specifically 
               for African entrepreneurs and professionals.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
                 variant="secondary"
@@ -356,7 +357,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-primary"
+                className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200"
               >
                 Become an Instructor
               </Button>
@@ -365,29 +366,55 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-muted/30">
+      {/* Stats Section - Custom Modern Layout */}
+      <section className="py-14 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: BookOpen, label: 'Courses', value: '150+' },
-              { icon: Users, label: 'Students', value: '12,000+' },
-              { icon: Award, label: 'Instructors', value: '45+' },
-              { icon: Globe, label: 'Countries', value: '25+' }
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <stat.icon className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="text-2xl font-bold text-foreground mb-1">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </motion.div>
-            ))}
+          <div className="flex flex-col items-center md:flex-row md:justify-center md:gap-10 gap-6">
+            {/* Stat Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+            >
+              <BookOpen className="w-10 h-10 text-primary mb-3" />
+              <span className="text-3xl font-extrabold text-foreground mb-1">150+</span>
+              <span className="text-base text-muted-foreground font-medium">Courses</span>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+            >
+              <Users className="w-10 h-10 text-primary mb-3" />
+              <span className="text-3xl font-extrabold text-foreground mb-1">12,000+</span>
+              <span className="text-base text-muted-foreground font-medium">Students</span>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+            >
+              <Award className="w-10 h-10 text-primary mb-3" />
+              <span className="text-3xl font-extrabold text-foreground mb-1">45+</span>
+              <span className="text-base text-muted-foreground font-medium">Instructors</span>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg px-10 py-8 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+            >
+              <Globe className="w-10 h-10 text-primary mb-3" />
+              <span className="text-3xl font-extrabold text-foreground mb-1">25+</span>
+              <span className="text-base text-muted-foreground font-medium">Countries</span>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -397,9 +424,9 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
         <div className="container mx-auto px-4">
           {/* Filters */}
           <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              {/* Search */}
-              <div className="relative">
+            <div className="mb-6">
+              {/* Search Bar */}
+              <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search courses..."
@@ -408,49 +435,46 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
                   className="pl-10"
                 />
               </div>
-
-              {/* Category Filter */}
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name} ({category.count})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Price Filter */}
-              <Select value={priceFilter} onValueChange={setPriceFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Price Range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="under-50">Under £50</SelectItem>
-                  <SelectItem value="50-100">£50 - £100</SelectItem>
-                  <SelectItem value="over-100">Over £100</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Sort */}
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort By" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="students">Most Popular</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Filters Row: horizontal scroll on mobile, grid on desktop */}
+              <div className="flex md:grid md:grid-cols-3 gap-3 overflow-x-auto pb-2 hide-scrollbar">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="min-w-[160px]">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name} ({category.count})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={priceFilter} onValueChange={setPriceFilter}>
+                  <SelectTrigger className="min-w-[140px]">
+                    <SelectValue placeholder="Price Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Prices</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="under-50">Under £50</SelectItem>
+                    <SelectItem value="50-100">£50 - £100</SelectItem>
+                    <SelectItem value="over-100">Over £100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="min-w-[140px]">
+                    <SelectValue placeholder="Sort By" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="featured">Featured</SelectItem>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="students">Most Popular</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Results Count */}

@@ -14,7 +14,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 1,
       name: "Traditional Kente Cloth",
-  price: "£45,000",
+      price: "£45.00",
       rating: 4.8,
       reviews: 124,
       seller: "Accra Crafts",
@@ -23,7 +23,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 2,
       name: "Handcrafted Wooden Sculpture",
-  price: "£28,500",
+      price: "£28.50",
       rating: 4.9,
       reviews: 89,
       seller: "Lagos Artisans",
@@ -32,7 +32,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 3,
       name: "African Print Dress",
-  price: "£15,200",
+      price: "£15.20",
       rating: 4.7,
       reviews: 156,
       seller: "Ankara Fashion",
@@ -41,7 +41,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     {
       id: 4,
       name: "Organic Shea Butter",
-  price: "£8,500",
+      price: "£8.50",
       rating: 4.6,
       reviews: 203,
       seller: "Natural Beauty Co",
@@ -54,7 +54,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       id: 1,
       title: "Digital Marketing for African Businesses",
       instructor: "Adaora Okafor",
-  price: "£25,000",
+      price: "₦25,000",
       rating: 4.9,
       students: 1240,
       duration: "8 weeks"
@@ -63,7 +63,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       id: 2,
       title: "Traditional Craft Business Setup",
       instructor: "Kwame Asante",
-  price: "£18,000",
+      price: "₦18,000",
       rating: 4.8,
       students: 856,
       duration: "6 weeks"
@@ -88,20 +88,20 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 Your trusted marketplace for authentic African products, skills training, 
                 and seamless money transfers. Built by Africans, for Africa.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+              <div className="flex flex-row gap-3 md:gap-4 justify-start">
                 <Button 
                   size="lg" 
                   variant="secondary"
                   onClick={() => onNavigate('marketplace')}
-                  className="text-primary w-full sm:w-auto"
+                  className="text-primary"
                 >
                   Explore Marketplace
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
                 <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-primary w-full sm:w-auto"
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200"
                   onClick={() => onNavigate('auth')}
                 >
                   Start Selling
@@ -238,6 +238,8 @@ export function HomePage({ onNavigate }: HomePageProps) {
                       </div>
                       <p className="text-xs md:text-sm text-muted-foreground mb-2">by {product.seller}</p>
                       <p className="text-base md:text-lg font-semibold text-primary">{product.price}</p>
+                      <p className="text-xs text-muted-foreground mt-2">High quality, authentic product from Africa.</p>
+                        {/* Removed 'View Details' button as requested */}
                     </div>
                   </CardContent>
                 </Card>
@@ -281,10 +283,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
                     </div>
                     <h3 className="mb-2 text-sm md:text-base line-clamp-2">{course.title}</h3>
                     <p className="text-xs md:text-sm text-muted-foreground mb-4">by {course.instructor}</p>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-xs md:text-sm text-muted-foreground">{course.students} students</span>
                       <span className="text-base md:text-lg font-semibold text-primary">{course.price}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-2">Learn practical skills for African business success.</p>
+                    <Button size="sm" className="w-full" onClick={() => onNavigate('courses')}>
+                      View Course
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
