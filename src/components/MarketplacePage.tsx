@@ -372,7 +372,7 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
         {/* Main Content */}
         <div className="lg:col-span-3 relative">
           {/* Sticky Mobile Search Bar */}
-          <div className="lg:hidden sticky top-0 z-30 bg-background pt-3 pb-2 mb-3 -mx-4 px-4 border-b">
+          <div className="lg:hidden sticky top-0 z-50 bg-background pt-3 pb-2 mb-3 px-4 border-b">
             <SearchBar
               value={filters.searchQuery}
               onChange={(value) => handleFiltersChange({ searchQuery: value })}
@@ -381,7 +381,7 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
           </div>
 
           {/* Horizontal Category Chips (Mobile) */}
-          <div className="lg:hidden overflow-x-auto no-scrollbar -mx-4 px-4 pb-3 mb-4">
+          <div className="lg:hidden overflow-x-auto no-scrollbar px-4 pb-3 mb-4">
             <div className="flex gap-2">
               {categories.filter(c => c.id !== 'all').map(cat => (
                 <button
@@ -439,8 +439,8 @@ export function MarketplacePage({ onNavigate, onAddToCart }: MarketplacePageProp
           />
 
           {/* Sticky Filters & Sort Button (Mobile) */}
-          <div className="lg:hidden fixed bottom-4 left-0 w-full flex justify-center z-40 pointer-events-none">
-            <div className="bg-background/80 backdrop-blur-sm p-1.5 rounded-full shadow-lg pointer-events-auto">
+          <div className="lg:hidden fixed bottom-4 left-0 w-full flex justify-center z-50">
+            <div className="bg-background/80 backdrop-blur-sm p-1.5 rounded-full shadow-lg pointer-events-auto" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
               <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
                 <SheetTrigger asChild>
                   <Button variant="default" className="rounded-full shadow-md px-5 h-10">

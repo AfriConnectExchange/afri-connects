@@ -117,15 +117,17 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="aspect-square overflow-hidden rounded-lg bg-muted">
+            <div className="aspect-square overflow-hidden rounded-lg bg-muted">
             <ImageWithFallback
               src={product.images[selectedImageIndex]}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="grid grid-cols-3 gap-2">
-            {product.images.map((image, index) => (
+              {product.images.map((image, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}
@@ -135,6 +137,8 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
                 <ImageWithFallback
                   src={image}
                   alt={`${product.name} ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </button>
@@ -258,7 +262,7 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
 
       {/* Seller Info & Product Details */}
       <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-        <div className="lg:col-span-2 order-2 lg:order-1">
+        <div className="lg:col-span-2 order-1 lg:order-1">
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="grid w-full grid-cols-3 text-xs md:text-sm">
               <TabsTrigger value="details" className="px-2 md:px-4">Product Details</TabsTrigger>
@@ -341,7 +345,7 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
         </div>
 
         {/* Seller Card */}
-        <div className="order-1 lg:order-2">
+  <div className="order-2 lg:order-2">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

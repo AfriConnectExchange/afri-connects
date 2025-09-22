@@ -87,7 +87,7 @@ export function ProductGrid({
   return (
     <div className="space-y-6">
       {/* Products Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 [grid-auto-rows:1fr]">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr items-stretch">
         {products.map((product, index) => (
           <ProductCard
             key={product.id}
