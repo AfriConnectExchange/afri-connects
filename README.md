@@ -1,7 +1,6 @@
 
   # Afri-Connect
 
-  This is a code bundle for Afri-Connect. The original project is available at https://www.figma.com/design/aWZgi5ImDnHGspZNfBX1lz/Afri-Connect.
 
   ## Running the code
 
