@@ -71,8 +71,8 @@ export function ProductGrid({
   // No results state  
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center py-16 text-center bg-accent/50 rounded-lg">
+        <div className="w-16 h-16 mb-4 rounded-full bg-background flex items-center justify-center">
           {searchQuery ? (
             <AlertCircle className="w-8 h-8 text-muted-foreground" />
           ) : (
@@ -84,7 +84,7 @@ export function ProductGrid({
           {searchQuery ? "No products found" : "No products available"}
         </h3>
         
-        <p className="text-sm text-muted-foreground max-w-md mb-6">
+        <p className="text-sm text-muted-foreground max-w-md mb-6 px-4">
           {getNoResultsMessage()}
         </p>
 
@@ -106,14 +106,14 @@ export function ProductGrid({
   return (
     <div className="space-y-6">
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         {products.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
             onNavigate={onNavigate}
             onAddToCart={onAddToCart}
-            animationDelay={index * 0.1}
+            animationDelay={index * 0.05}
             currency={currency}
           />
         ))}

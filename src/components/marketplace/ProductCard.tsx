@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { FreeListingBadge, GifterBadge } from './FreeListingBadge';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface Product {
   id: number;
@@ -66,115 +66,89 @@ export function ProductCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
+      className="h-full"
     >
-      <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+      <Card className="group border-border/60 hover:shadow-xl hover:border-primary/20 transition-all duration-300 h-full flex flex-col overflow-hidden">
         <CardContent className="p-0 flex-1 flex flex-col">
           {/* Image Section */}
-          <div className="relative overflow-hidden rounded-t-lg">
-            <ImageWithFallback
-              src={product.image}
-              alt={product.name}
-              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          <div className="relative overflow-hidden">
+            <div
+              className="aspect-[4/3] w-full cursor-pointer"
               onClick={() => onNavigate('product', product.id)}
-            />
+            >
+              <ImageWithFallback
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
             
             {/* Badges Overlay */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {product.isFree && <FreeListingBadge variant="compact" />}
               {product.featured && !product.isFree && (
-                <Badge className="bg-primary text-white text-xs">Featured</Badge>
+                <Badge className="bg-primary text-white text-[10px] h-5">Featured</Badge>
               )}
               {product.discount && !product.isFree && (
-                <Badge variant="destructive" className="text-xs">-{product.discount}%</Badge>
-              )}
-              {product.condition && product.condition !== 'new' && (
-                <Badge variant="outline" className="text-xs bg-white/90">
-                  {product.condition.replace('-', ' ')}
-                </Badge>
+                <Badge variant="destructive" className="text-[10px] h-5">-{product.discount}%</Badge>
               )}
             </div>
             
             {/* Wishlist Button */}
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
-              className="absolute top-2 right-2 bg-white/80 hover:bg-white w-8 h-8"
+              className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm hover:bg-background w-8 h-8 rounded-full"
               onClick={(e) => {
                 e.stopPropagation();
                 // Handle wishlist toggle
               }}
             >
-              <Heart className="w-4 h-4" />
+              <Heart className="w-4 h-4 text-foreground/70" />
             </Button>
-
-            {/* Shipping Info */}
-            {product.shippingType === 'free' && !product.isFree && (
-              <div className="absolute bottom-2 left-2">
-                <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
-                  Free Shipping
-                </Badge>
-              </div>
-            )}
           </div>
 
           {/* Content Section */}
-          <div className="p-4 flex-1 flex flex-col">
+          <div className="p-3 flex-1 flex flex-col bg-background hover:bg-accent/30 transition-colors">
             {/* Title */}
             <h3 
-              className="mb-2 line-clamp-2 cursor-pointer hover:text-primary text-sm font-medium leading-tight"
+              className="mb-1.5 line-clamp-2 cursor-pointer text-sm font-semibold leading-tight text-foreground"
               onClick={() => onNavigate('product', product.id)}
             >
               {product.name}
             </h3>
 
+            {/* Seller Info */}
+            <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
+              <span>by {product.seller}</span>
+              {product.sellerVerified && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-green-500/50 bg-green-500/10 text-green-700">Verified</Badge>
+              )}
+            </div>
+
             {/* Rating */}
             <div className="flex items-center gap-1 mb-2">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-medium">{product.rating}</span>
+              <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs font-medium text-foreground">{product.rating}</span>
               <span className="text-xs text-muted-foreground">({product.reviews})</span>
             </div>
-
-            {/* Seller Info */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-muted-foreground">by {product.seller}</span>
-              {product.sellerVerified && (
-                <Badge variant="secondary" className="text-xs">Verified</Badge>
-              )}
-              {product.isGifterListing && <GifterBadge />}
-            </div>
-
-            {/* Location */}
-            {product.location && (
-              <div className="flex items-center gap-1 mb-2">
-                <MapPin className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{product.location}</span>
-              </div>
-            )}
-
-            {/* Delivery Time */}
-            {product.estimatedDelivery && !product.isFree && (
-              <div className="flex items-center gap-1 mb-3">
-                <Clock className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{product.estimatedDelivery}</span>
-              </div>
-            )}
-
+            
             {/* Price and Action - Push to bottom */}
-            <div className="flex justify-between items-center mt-auto">
+            <div className="flex justify-between items-center mt-auto pt-2">
               <div>
                 {product.isFree ? (
-                  <span className="text-lg font-semibold text-green-600">Free</span>
+                  <span className="text-base sm:text-lg font-bold text-green-600">Free</span>
                 ) : (
-                  <>
-                    <span className="text-lg font-semibold text-primary">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-base sm:text-lg font-bold text-primary">
                       {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through ml-2">
+                      <span className="text-xs text-muted-foreground line-through">
                         {formatPrice(product.originalPrice)}
                       </span>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
               
@@ -185,18 +159,12 @@ export function ProductCard({
                   handleAddToCart();
                 }}
                 variant={product.isFree ? "outline" : "default"}
-                className="flex items-center gap-1 text-xs"
+                className="rounded-full h-8 px-3"
               >
                 {product.isFree ? (
-                  <>
-                    <Heart className="w-3 h-3" />
-                    <span className="hidden sm:inline">Claim</span>
-                  </>
+                  <Heart className="w-3.5 h-3.5" />
                 ) : (
-                  <>
-                    <ShoppingCart className="w-3 h-3" />
-                    <span className="hidden sm:inline">Add</span>
-                  </>
+                  <ShoppingCart className="w-3.5 h-3.5" />
                 )}
               </Button>
             </div>
