@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Separator } from './ui/separator';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { LoadingSpinner } from './LoadingSpinner';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface ProductPageProps {
   productId: number;
@@ -129,10 +129,9 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
               <button
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}
-                className={`aspect-square overflow-hidden rounded-lg border-2 transition-colors ${
+                className={`aspect-square overflow-hidden rounded-md border-2 transition-colors ${
                   selectedImageIndex === index ? 'border-primary' : 'border-transparent hover:border-primary/50'
-                }`}
-              >
+                }`}>
                 <ImageWithFallback
                   src={image}
                   alt={`${product.name} ${index + 1}`}
@@ -157,15 +156,15 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
                 <Badge variant="destructive" className="text-xs">-{product.discount}%</Badge>
               )}
             </div>
-            <h1 className="mb-3 md:mb-4 text-xl md:text-2xl lg:text-3xl leading-tight">{product.name}</h1>
+            <h1 className="mb-3 md:mb-4 text-2xl md:text-3xl font-bold leading-tight">{product.name}</h1>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 md:w-5 md:h-5 fill-yellow-400 text-yellow-400" />
                 <span className="font-medium text-sm md:text-base">{product.rating}</span>
                 <span className="text-muted-foreground text-sm md:text-base">({product.reviews} reviews)</span>
               </div>
-              <Separator orientation="vertical" className="hidden sm:block h-4" />
+              <Separator orientation="vertical" className="h-4" />
               <span className="text-muted-foreground text-sm md:text-base">{product.sold} sold</span>
             </div>
 
@@ -187,53 +186,51 @@ export function ProductPage({ productId, onNavigate, onAddToCart }: ProductPageP
 
           {/* Quantity and Actions */}
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Quantity</label>
-                <div className="flex items-center border rounded-lg w-fit">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    className="p-2"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="px-4 py-2 min-w-[50px] text-center text-sm md:text-base">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                    disabled={quantity >= product.stockCount}
-                    className="p-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
+            <div className="flex items-center gap-4">
+              <label htmlFor="quantity" className="text-sm font-medium">Quantity</label>
+              <div className="flex items-center border rounded-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={quantity <= 1}
+                  className="h-9 w-9"
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                <span id="quantity" className="px-4 text-center font-medium text-sm md:text-base">{quantity}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setQuantity(Math.min(product.stockCount, quantity + 1))}
+                  disabled={quantity >= product.stockCount}
+                  className="h-9 w-9"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
               <div className="text-xs md:text-sm text-muted-foreground">
                 {product.stockCount} pieces available
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button size="lg" className="flex-1 w-full sm:w-auto" onClick={handleAddToCart}>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </Button>
-              <Button size="lg" variant="outline" className="flex-1 w-full sm:w-auto">
-                Buy Now
-              </Button>
-              <div className="flex gap-2 sm:gap-3">
-                <Button size="lg" variant="ghost" className="flex-1 sm:flex-none">
-                  <Heart className="w-4 h-4" />
-                  <span className="ml-2 sm:hidden">Save</span>
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Button size="lg" className="w-full h-12" onClick={handleAddToCart}>
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart
                 </Button>
-                <Button size="lg" variant="ghost" className="flex-1 sm:flex-none">
-                  <Share2 className="w-4 h-4" />
-                  <span className="ml-2 sm:hidden">Share</span>
+                <Button size="lg" variant="secondary" className="w-full h-12">
+                  Buy Now
                 </Button>
+              </div>
+              <div className="flex items-center justify-end gap-1">
+                 <Button size="icon" variant="ghost" className="rounded-full">
+                   <Heart className="w-5 h-5 text-muted-foreground" />
+                 </Button>
+                 <Button size="icon" variant="ghost" className="rounded-full">
+                   <Share2 className="w-5 h-5 text-muted-foreground" />
+                 </Button>
               </div>
             </div>
           </div>

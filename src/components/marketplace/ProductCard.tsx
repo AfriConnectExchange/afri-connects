@@ -47,7 +47,6 @@ export function ProductCard({
 
   const handleAddToCart = () => {
     if (product.isFree) {
-      // Free items go directly to "claim" flow
       onNavigate('product', product.id);
       return;
     }
@@ -66,7 +65,6 @@ export function ProductCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
-      className="h-full"
     >
       <Card className="group border-border/60 hover:shadow-xl hover:border-primary/20 transition-all duration-300 h-full flex flex-col overflow-hidden">
         <CardContent className="p-0 flex-1 flex flex-col">
@@ -83,7 +81,6 @@ export function ProductCard({
               />
             </div>
             
-            {/* Badges Overlay */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {product.isFree && <FreeListingBadge variant="compact" />}
               {product.featured && !product.isFree && (
@@ -94,15 +91,11 @@ export function ProductCard({
               )}
             </div>
             
-            {/* Wishlist Button */}
             <Button
               variant="secondary"
               size="icon"
               className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm hover:bg-background w-8 h-8 rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle wishlist toggle
-              }}
+              onClick={(e) => { e.stopPropagation(); /* Handle wishlist toggle */ }}
             >
               <Heart className="w-4 h-4 text-foreground/70" />
             </Button>
@@ -110,15 +103,13 @@ export function ProductCard({
 
           {/* Content Section */}
           <div className="p-3 flex-1 flex flex-col bg-background hover:bg-accent/30 transition-colors">
-            {/* Title */}
             <h3 
-              className="mb-1.5 line-clamp-2 cursor-pointer text-sm font-semibold leading-tight text-foreground"
+              className="mb-1.5 line-clamp-2 cursor-pointer text-sm font-semibold leading-tight text-foreground min-h-[42px]"
               onClick={() => onNavigate('product', product.id)}
             >
               {product.name}
             </h3>
 
-            {/* Seller Info */}
             <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
               <span>by {product.seller}</span>
               {product.sellerVerified && (
@@ -126,14 +117,12 @@ export function ProductCard({
               )}
             </div>
 
-            {/* Rating */}
             <div className="flex items-center gap-1 mb-2">
               <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
               <span className="text-xs font-medium text-foreground">{product.rating}</span>
               <span className="text-xs text-muted-foreground">({product.reviews})</span>
             </div>
             
-            {/* Price and Action - Push to bottom */}
             <div className="flex justify-between items-center mt-auto pt-2">
               <div>
                 {product.isFree ? (
@@ -153,18 +142,15 @@ export function ProductCard({
               </div>
               
               <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddToCart();
-                }}
-                variant={product.isFree ? "outline" : "default"}
-                className="rounded-full h-8 px-3"
+                size="icon"
+                onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
+                variant={product.isFree ? "outline" : "secondary"}
+                className="rounded-full h-8 w-8"
               >
                 {product.isFree ? (
-                  <Heart className="w-3.5 h-3.5" />
+                  <Heart className="w-4 h-4" />
                 ) : (
-                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <ShoppingCart className="w-4 h-4" />
                 )}
               </Button>
             </div>
