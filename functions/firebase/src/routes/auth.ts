@@ -9,6 +9,9 @@ import {
   sendOtp,
   verifyOtp,
   updateProfile,
+  changeEmail,
+  getAvatarUploadUrl,
+  removeAvatar,
 } from '../services/authController';
 
 export const authRouter = Router();

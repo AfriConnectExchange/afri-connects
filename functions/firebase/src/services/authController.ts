@@ -5,6 +5,16 @@ import fetch from 'node-fetch';
 import { createOtp, getOtp, deleteOtp, incrementOtpAttempts } from './otpService';
 import { recordFailedLogin, isLocked, resetAttempts } from './loginAttemptService';
 import { sendEmail, sendSms } from './messaging';
+import { getAvatarUploadUrl, removeAvatar } from './profileService';
+
+const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY;
+
+async function identityToolkitSignInWithPassword(email: string, password: string) {
+  if (!FIREBASE_WEB_API_KEY) throw new Error('FIREBASE_WEB_API_KEY not configured');
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`;
+  const resp = await fetch(url, { method: 'POST', body: JSON.stringify({ email, password, returnSecureToken: true }), headers: { 'Content-Type': 'application/json' } });
+  return resp.json();
+}
 
 // In-memory OTP store (scaffold). Replace with Redis or DB in production.
 const otpStore: Record<string, { code: string; expiresAt: number; attempts: number; blockedUntil?: number }> = {};
@@ -96,14 +106,56 @@ export async function loginEmailPassword(req: Request, res: Response) {
   if (!email || !password) return res.status(400).json({ message: 'Missing email or password.' });
 
   try {
-    // Firebase Admin cannot verify password directly; instead this backend should use Firebase Auth REST API or rely on client SDK.
-    // For scaffold we'll return instruction to use client-side signInWithEmailAndPassword, or implement REST verify.
-    return res.status(501).json({ message: 'Use client SDK for email/password sign-in or implement REST verify in backend.' });
+    // Check lock
+    const locked = await isLocked(email);
+    if (locked) return res.status(423).json({ message: 'Account locked. Try later.' });
+
+    const result = await identityToolkitSignInWithPassword(email, password).catch(err => ({ error: err }));
+    if (result && (result as any).error) {
+      // record failed attempt
+      await recordFailedLogin(email);
+      // Check if now locked
+      const nowLocked = await isLocked(email);
+      if (nowLocked) {
+        // send email alert if possible
+        const user = await admin.auth().getUserByEmail(email).catch(() => null);
+        if (user) await sendEmail(email, 'Account locked', `<p>Your account has been locked due to multiple failed sign-in attempts.</p>`).catch(() => null);
+        return res.status(423).json({ message: 'Account locked due to multiple failed attempts.' });
+      }
+      return res.status(401).json({ message: 'Incorrect email or password.' });
+    }
+
+    // Success: reset attempts
+    await resetAttempts(email);
+    // return idToken and refreshToken to the client
+    return res.status(200).json({ idToken: (result as any).idToken, refreshToken: (result as any).refreshToken });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error' });
   }
 }
+
+export async function changeEmail(req: Request, res: Response) {
+  const { idToken, newEmail } = req.body;
+  if (!idToken || !newEmail) return res.status(400).json({ message: 'Missing token or new email.' });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail)) return res.status(400).json({ message: 'Invalid email format. Please use name@domain.com.' });
+  try {
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    // Create change token stored in firestore
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+    await admin.firestore().collection('emailChangeRequests').doc(token).set({ uid: decoded.uid, newEmail, expiresAt });
+    const link = `${process.env.FRONTEND_BASE_URL}/auth/confirm-change-email?token=${token}`;
+    await sendEmail(newEmail, 'Confirm your new email', `<p>Click <a href="${link}">here</a> to confirm your new email address.</p>`).catch(err => console.error(err));
+    return res.status(200).json({ message: 'Verification sent to new email.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+}
+
+// Re-export profile service handlers for route imports
+export { getAvatarUploadUrl, removeAvatar };
 
 export async function requestPasswordReset(req: Request, res: Response) {
   const { email } = req.body;
