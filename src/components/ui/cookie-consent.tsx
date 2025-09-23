@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cookie, X, ShieldCheck, Settings, Info } from 'lucide-react';
+import { Cookie, ShieldCheck, Settings, Info } from 'lucide-react';
 import { Button } from './button';
-import { Separator } from './separator';
 import { Switch } from './switch';
 import {
   Dialog,
@@ -82,48 +81,50 @@ export function CookieConsent({ onAccept, onDecline, forceOpen }: CookieConsentP
   return (
     <AnimatePresence>
       <Dialog>
-        {/* Floating Banner */}
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
+          initial={{ y: "100%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 20, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-4 left-4 z-50 w-[calc(100%-2rem)] max-w-md rounded-xl border bg-background/80 p-5 shadow-2xl backdrop-blur-lg md:w-full"
+          exit={{ y: "100%", opacity: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] backdrop-blur-sm md:bottom-4 md:right-4 md:max-w-md md:rounded-xl md:border"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <Cookie className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">We Use Cookies</h3>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            Our website uses cookies to enhance your experience and analyze traffic. You can choose to accept all cookies or customize your settings.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleAcceptAll} className="w-full sm:w-auto flex-1">Accept All</Button>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="w-full sm:w-auto">Customize</Button>
-            </DialogTrigger>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <Cookie className="h-5 w-5 flex-shrink-0 text-primary mt-0.5" />
+              <div>
+                <h3 className="font-semibold">We Value Your Privacy</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  We use cookies to enhance your browsing experience and analyze site traffic. Click "Accept All" to consent to our use of cookies.
+                </p>
+              </div>
+            </div>
+            <div className="flex w-full flex-shrink-0 gap-2">
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex-1">Customize</Button>
+              </DialogTrigger>
+              <Button onClick={handleAcceptAll} className="flex-1">Accept All</Button>
+            </div>
           </div>
         </motion.div>
 
-        {/* Customization Dialog */}
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Customize Your Cookie Preferences</DialogTitle>
+            <DialogTitle>Customize Cookie Preferences</DialogTitle>
             <DialogDescription>
-              Choose which types of cookies you want to enable. Necessary cookies are required for the site to function.
+              Manage your cookie settings below. You can enable or disable different categories of cookies.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <CookieCategory
               icon={ShieldCheck}
               title="Necessary Cookies"
-              description="These are essential for the website to function and cannot be disabled."
+              description="Essential for the website to function properly. These cannot be disabled."
               switchProps={{ checked: true, disabled: true }}
             />
             <CookieCategory
               icon={Info}
               title="Analytics Cookies"
-              description="Help us understand how you use our site to improve performance."
+              description="Help us understand how visitors interact with our website by collecting and reporting information anonymously."
               switchProps={{ 
                 checked: preferences.analytics, 
                 onCheckedChange: (checked) => updatePreference('analytics', checked) 
@@ -132,7 +133,7 @@ export function CookieConsent({ onAccept, onDecline, forceOpen }: CookieConsentP
             <CookieCategory
               icon={Settings}
               title="Preference Cookies"
-              description="Remember your settings and preferences for a more personalized experience."
+              description="Enable the website to remember information that changes the way the site behaves or looks."
               switchProps={{ 
                 checked: preferences.preferences, 
                 onCheckedChange: (checked) => updatePreference('preferences', checked) 
@@ -141,25 +142,23 @@ export function CookieConsent({ onAccept, onDecline, forceOpen }: CookieConsentP
             <CookieCategory
               icon={Cookie}
               title="Marketing Cookies"
-              description="Used to deliver relevant ads and measure the effectiveness of campaigns."
+              description="Used to track visitors across websites to display relevant ads."
               switchProps={{ 
                 checked: preferences.marketing, 
                 onCheckedChange: (checked) => updatePreference('marketing', checked) 
               }}
             />
           </div>
-          <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between w-full">
+          <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2">
             <DialogClose asChild>
                 <Button variant="outline" onClick={handleDeclineAll}>Decline All</Button>
             </DialogClose>
-            <div className="flex gap-2 mb-2 sm:mb-0">
-                <DialogClose asChild>
-                    <Button variant="secondary" onClick={handleAcceptSelected}>Save Preferences</Button>
-                </DialogClose>
-                <DialogClose asChild>
-                    <Button onClick={handleAcceptAll}>Accept All</Button>
-                </DialogClose>
-            </div>
+            <DialogClose asChild>
+                <Button variant="secondary" onClick={handleAcceptSelected}>Save Preferences</Button>
+            </DialogClose>
+            <DialogClose asChild>
+                <Button onClick={handleAcceptAll}>Accept All</Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -167,15 +166,14 @@ export function CookieConsent({ onAccept, onDecline, forceOpen }: CookieConsentP
   );
 }
 
-// Helper component for cleaner code in the dialog
 function CookieCategory({ icon: Icon, title, description, switchProps }: {
   icon: React.ElementType,
   title: string,
   description: string,
-  switchProps: React.ComponentProps<typeof Switch>
+  switchProps: React.ComponentProps<typeof Switch>;
 }) {
   return (
-    <div className="flex items-start justify-between rounded-lg border p-4">
+    <div className="flex items-start justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50">
       <div className="flex items-start gap-4 pr-4">
         <Icon className="h-5 w-5 text-muted-foreground mt-1 flex-shrink-0" />
         <div>
@@ -185,5 +183,5 @@ function CookieCategory({ icon: Icon, title, description, switchProps }: {
       </div>
       <Switch {...switchProps} />
     </div>
-  )
+  );
 }
