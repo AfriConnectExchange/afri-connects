@@ -25,7 +25,8 @@ interface CartItem {
   price: number;
   originalPrice?: number;
   image: string;
-  seller: string;
+  // seller can be a simple string or an object coming from product data
+  seller: string | { name?: string; [key: string]: any };
   quantity: number;
   inStock: boolean;
   category: string;
@@ -106,6 +107,14 @@ export function CartPage({ onNavigate, cartItems, onUpdateCart }: CartPageProps)
   const calculateDiscount = () => calculateSubtotal() * promoDiscount;
   
   const calculateTotal = () => calculateSubtotal() + calculateShipping() - calculateDiscount();
+
+  // Helper to safely get a seller display name when seller may be an object
+  const getSellerName = (seller: any) => {
+    if (!seller) return 'Unknown Seller';
+    if (typeof seller === 'string') return seller;
+    if (typeof seller === 'object') return seller.name || seller.username || 'Unknown Seller';
+    return String(seller);
+  };
 
   const handleProceedToCheckout = () => {
     if (!agreeToTerms) {
@@ -246,7 +255,7 @@ export function CartPage({ onNavigate, cartItems, onUpdateCart }: CartPageProps)
                                 )}
                             </div>
                           </div>
-                          <p className="text-xs text-muted-foreground">Sold by {item.seller}</p>
+                          <p className="text-xs text-muted-foreground">Sold by {getSellerName(item.seller)}</p>
                           <Badge variant="outline" className="text-xs mt-1">{item.category}</Badge>
                         </div>
 
