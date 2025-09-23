@@ -1,9 +1,9 @@
-import { Star, Heart, ShoppingCart, MapPin, Clock } from 'lucide-react';
+import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { FreeListingBadge, GifterBadge } from './FreeListingBadge';
+import { FreeListingBadge } from './FreeListingBadge';
 import { motion } from 'framer-motion';
 
 interface Product {
@@ -20,11 +20,6 @@ interface Product {
   featured?: boolean;
   discount?: number;
   isFree?: boolean;
-  isGifterListing?: boolean;
-  location?: string;
-  condition?: 'new' | 'like-new' | 'good' | 'fair';
-  shippingType?: 'free' | 'paid' | 'pickup-only';
-  estimatedDelivery?: string;
 }
 
 interface ProductCardProps {
@@ -54,9 +49,6 @@ export function ProductCard({
     onAddToCart({
       ...product,
       quantity: 1,
-      inStock: true,
-      shippingCost: product.shippingType === 'free' ? 0 : Math.floor(Math.random() * 10) + 5,
-      estimatedDelivery: product.estimatedDelivery || '5-7 business days'
     });
   };
 
@@ -65,20 +57,18 @@ export function ProductCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: animationDelay }}
+      className="h-full"
     >
-      <Card className="group border-border/60 hover:shadow-xl hover:border-primary/20 transition-all duration-300 h-full flex flex-col overflow-hidden">
+      <Card className="group border-border/60 hover:shadow-lg transition-all duration-300 h-full flex flex-col overflow-hidden">
         <CardContent className="p-0 flex-1 flex flex-col">
-          {/* Image Section */}
           <div className="relative overflow-hidden">
             <div
-              className="aspect-[4/3] w-full cursor-pointer"
+              className="aspect-square w-full cursor-pointer"
               onClick={() => onNavigate('product', product.id)}
             >
               <ImageWithFallback
                 src={product.image}
                 alt={product.name}
-                loading="lazy"
-                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
@@ -96,30 +86,29 @@ export function ProductCard({
             <Button
               variant="secondary"
               size="icon"
-              className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm hover:bg-background w-8 h-8 rounded-full"
-              onClick={(e) => { e.stopPropagation(); /* Handle wishlist toggle */ }}
+              className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm hover:bg-background w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={(e) => { e.stopPropagation(); /* Handle wishlist */ }}
             >
               <Heart className="w-4 h-4 text-foreground/70" />
             </Button>
           </div>
 
-          {/* Content Section */}
-          <div className="p-3 flex-1 flex flex-col bg-background hover:bg-accent/30 transition-colors">
+          <div className="p-3 flex-1 flex flex-col">
             <h3 
-              className="mb-1.5 line-clamp-2 cursor-pointer text-sm font-semibold leading-tight text-foreground min-h-[42px]"
+              className="mb-1.5 line-clamp-2 cursor-pointer text-sm font-semibold leading-tight h-[40px]"
               onClick={() => onNavigate('product', product.id)}
             >
               {product.name}
             </h3>
 
             <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
-              <span>by {product.seller}</span>
+              <span>{product.seller}</span>
               {product.sellerVerified && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-green-500/50 bg-green-500/10 text-green-700">Verified</Badge>
               )}
             </div>
 
-            <div className="flex items-center gap-1 mb-2">
+            <div className="flex items-center gap-1 mb-3">
               <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
               <span className="text-xs font-medium text-foreground">{product.rating}</span>
               <span className="text-xs text-muted-foreground">({product.reviews})</span>
@@ -128,10 +117,10 @@ export function ProductCard({
             <div className="flex justify-between items-center mt-auto pt-2">
               <div>
                 {product.isFree ? (
-                  <span className="text-base sm:text-lg font-bold text-green-600">Free</span>
+                  <span className="text-lg font-bold text-green-600">Free</span>
                 ) : (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-base sm:text-lg font-bold text-primary">
+                    <span className="text-lg font-bold text-primary">
                       {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && (
@@ -146,7 +135,7 @@ export function ProductCard({
               <Button
                 size="icon"
                 onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
-                variant={product.isFree ? "outline" : "secondary"}
+                variant={product.isFree ? "outline" : "default"}
                 className="rounded-full h-8 w-8"
               >
                 {product.isFree ? (

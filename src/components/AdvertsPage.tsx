@@ -167,11 +167,11 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
             >
               <AnimatedButton
                 onClick={() => setShowCreateModal(true)}
-                className="gap-2"
+                className="flex items-center gap-2"
                 animationType="glow"
               >
                 <Plus className="w-4 h-4" />
-                Create Advert
+                <span>Create Advert</span>
               </AnimatedButton>
             </motion.div>
           </div>
@@ -183,7 +183,7 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8"
         >
           <Card>
             <CardContent className="p-6 text-center">

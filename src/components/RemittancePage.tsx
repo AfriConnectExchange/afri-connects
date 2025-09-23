@@ -1,66 +1,33 @@
 // FILE: src/components/RemittancePage.tsx
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Send, History, Search, CheckCircle, Clock, AlertCircle, Eye, Download, 
-  ArrowRight, User, Phone, CreditCard, Wallet, Loader2
+  ArrowRight, CreditCard, Wallet, Loader2
 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { AnimatedButton } from './ui/animated-button';
 import { CustomModal } from './ui/custom-modal';
 import { CustomAlert } from './ui/custom-alert';
 
-// --- API Integration Hook ---
-const API_KEY = 'YOUR_API_KEY_HERE'; // IMPORTANT: Replace with your free key from exchangerate-api.com
-const BASE_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/GBP`;
-
-// Mock rates as a fallback if the API fails or key is missing
-const mockRates = { "NGN": 1800.52, "KES": 168.33, "GHS": 15.41, "ZAR": 22.87, "EGP": 59.20, "MAD": 12.44 };
+const mockRates = { "NGN": 1800.52, "KES": 168.33, "GHS": 15.41, "ZAR": 22.87 };
 
 function useExchangeRates() {
-  const [rates, setRates] = useState<Record<string, number> | null>(null);
-
-  useEffect(() => {
-    async function fetchRates() {
-      if (API_KEY === 'YOUR_API_KEY_HERE') {
-        console.warn("Using mock exchange rates. Please add your ExchangeRate-API key.");
-        setRates(mockRates);
-        return;
-      }
-      try {
-        const response = await fetch(BASE_URL);
-        if (!response.ok) throw new Error('Failed to fetch rates');
-        const data = await response.json();
-        if (data.result === 'success') {
-          setRates(data.conversion_rates);
-        } else {
-          setRates(mockRates); // Fallback on API error
-        }
-      } catch (err) {
-        console.error(err);
-        setRates(mockRates); // Fallback on network error
-      }
-    }
-    fetchRates();
-  }, []);
-
+  const [rates, setRates] = useState<Record<string, number> | null>(mockRates);
   return { rates };
 }
 
-
-// --- Component ---
 interface RemittancePageProps {
   onNavigate: (page: string) => void;
 }
 const mockTransfers = [
-    { id: 'AC-REM-001', recipient: 'John Doe', recipientPhone: '+234 801 234 5678', amountSent: 250, recipientCountry: 'Nigeria', status: 'delivered', date: '2025-09-20T14:30:00Z', paymentMethod: 'Credit Card'},
-    { id: 'AC-REM-002', recipient: 'Sarah Johnson', recipientPhone: '+254 712 345 678', amountSent: 150, recipientCountry: 'Kenya', status: 'pending', date: '2025-09-19T10:00:00Z', paymentMethod: 'Digital Wallet'},
-    { id: 'AC-REM-003', recipient: 'Michael Brown', recipientPhone: '+233 24 123 4567', amountSent: 500, recipientCountry: 'Ghana', status: 'failed', date: '2025-09-18T16:45:00Z', paymentMethod: 'Credit Card'}
+    { id: 'AC-REM-001', recipient: 'John Doe', amountSent: 250, recipientCountry: 'Nigeria', status: 'delivered', date: '2025-09-20T14:30:00Z', paymentMethod: 'Credit Card'},
+    { id: 'AC-REM-002', recipient: 'Sarah Johnson', amountSent: 150, recipientCountry: 'Kenya', status: 'pending', date: '2025-09-19T10:00:00Z', paymentMethod: 'Digital Wallet'},
+    { id: 'AC-REM-003', recipient: 'Michael Brown', amountSent: 500, recipientCountry: 'Ghana', status: 'failed', date: '2025-09-18T16:45:00Z', paymentMethod: 'Credit Card'}
 ];
 const countries = [
   { code: 'NG', name: 'Nigeria', flag: '🇳🇬', currency: 'NGN' },
@@ -69,19 +36,17 @@ const countries = [
   { code: 'ZA', name: 'South Africa', flag: '🇿🇦', currency: 'ZAR' }
 ];
 const MIN_SEND_AMOUNT = 5.00;
-const FEE_PERCENTAGE = 0.015; // 1.5%
+const FEE_PERCENTAGE = 0.015;
 
 export function RemittancePage({ onNavigate }: RemittancePageProps) {
   const { rates } = useExchangeRates();
   const [activeTab, setActiveTab] = useState<'send' | 'history'>('send');
   
-  // Modal State
   const [modalView, setModalView] = useState<'send' | 'details' | null>(null);
   const [selectedTransfer, setSelectedTransfer] = useState<(typeof mockTransfers)[0] | null>(null);
   const [sendStep, setSendStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Form State
   const [sendAmount, setSendAmount] = useState('');
   const [receiveAmount, setReceiveAmount] = useState(0);
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
@@ -102,7 +67,6 @@ export function RemittancePage({ onNavigate }: RemittancePageProps) {
     const amountToConvert = amount - calculatedFee; setExchangeRate(rate); setFee(calculatedFee); setReceiveAmount(amountToConvert * rate);
   }, [sendAmount, selectedCountry, rates]);
 
-  // History State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -154,82 +118,80 @@ export function RemittancePage({ onNavigate }: RemittancePageProps) {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'send' | 'history')}>
-          <TabsList className="grid w-full md:w-fit grid-cols-2 mb-8 bg-slate-200/60 p-1 rounded-lg h-auto">
-            <TabsTrigger value="send" className="px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">Send Money</TabsTrigger>
-            <TabsTrigger value="history" className="px-6 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">Transfer History</TabsTrigger>
-          </TabsList>
+        <div className="flex justify-center mb-8">
+            <div className="flex space-x-2 p-1 bg-slate-200/60 rounded-lg">
+                <Button variant={activeTab === 'send' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('send')} className="w-32">Send Money</Button>
+                <Button variant={activeTab === 'history' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('history')} className="w-32">Transfer History</Button>
+            </div>
+        </div>
 
-          <TabsContent value="send">
+        {activeTab === 'send' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="bg-white border-0 shadow-lg shadow-slate-200/50 rounded-xl">
                 <CardContent className="p-6 md:p-10">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 items-center">
-                    <div className="md:col-span-2 space-y-3">
-                      <Label className="text-gray-500">You send</Label>
-                      <div className="relative">
-                        <Input 
-                          type="number" value={sendAmount} onChange={(e) => setSendAmount(e.target.value)}
-                          placeholder="0.00" 
-                          className="text-3xl md:text-4xl font-bold h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" 
-                        />
-                        <div className="absolute top-1/2 -translate-y-1/2 right-0 bg-slate-100 font-medium text-slate-700 px-4 py-2 rounded-lg">GBP</div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-center my-2 md:my-0">
-                        <div className="bg-slate-200/70 p-3 rounded-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div className="space-y-3">
+                          <Label className="text-gray-500">You send</Label>
+                          <div className="relative">
+                            <Input 
+                              type="number" value={sendAmount} onChange={(e) => setSendAmount(e.target.value)}
+                              placeholder="0.00" 
+                              className="text-4xl font-bold h-auto p-0 border-0 focus-visible:ring-0 bg-transparent" 
+                            />
+                            <div className="absolute top-1/2 -translate-y-1/2 right-0 bg-slate-100 font-medium text-slate-700 px-4 py-2 rounded-lg">GBP</div>
+                          </div>
+                        </div>
+                        <div className="my-6 flex justify-center">
                             <ArrowRight className="w-6 h-6 text-slate-500" />
                         </div>
+                        <div className="space-y-3">
+                          <Label className="text-gray-500">Recipient gets</Label>
+                          <div className="relative">
+                            <p className="text-4xl font-bold text-primary truncate pr-28">
+                              {receiveAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </p>
+                            <Select onValueChange={(code) => setSelectedCountry(countries.find(c => c.code === code)!)} defaultValue={selectedCountry.code}>
+                                <SelectTrigger className="absolute top-1/2 -translate-y-1/2 right-0 w-auto bg-slate-100 font-medium text-slate-700 rounded-lg h-11">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.flag} {c.currency}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                     </div>
-
-                    <div className="md:col-span-2 space-y-3">
-                      <Label className="text-gray-500">Recipient gets</Label>
-                       <div className="relative">
-                        <p className="text-3xl md:text-4xl font-bold text-primary truncate pr-28">
-                          {receiveAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        <Select onValueChange={(code) => setSelectedCountry(countries.find(c => c.code === code)!)} defaultValue={selectedCountry.code}>
-                            <SelectTrigger className="absolute top-1/2 -translate-y-1/2 right-0 w-auto bg-slate-100 font-medium text-slate-700 rounded-lg h-11">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {countries.map(c => <SelectItem key={c.code} value={c.code}>{c.flag} {c.currency}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                      </div>
+                    
+                    <div className="mt-8 md:mt-0">
+                        {error && (
+                           <motion.p initial={{ opacity: 0}} animate={{ opacity: 1}} className="text-center text-red-600 text-sm font-medium mb-4">{error}</motion.p>
+                        )}
+                        <div className="space-y-4 text-sm text-gray-600 p-4 bg-slate-50 rounded-lg">
+                            <div className="flex justify-between items-center">
+                                <p>Exchange rate:</p>
+                                <p className="font-medium text-gray-800">1 GBP ≈ {(exchangeRate || 0).toFixed(2)} {selectedCountry.currency}</p>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <p>Fee ({(FEE_PERCENTAGE * 100).toFixed(2)}%):</p>
+                                <p className="font-medium text-gray-800">£{fee.toFixed(2)}</p>
+                            </div>
+                            <div className="flex justify-between items-center font-semibold text-gray-800 mt-4 pt-4 border-t">
+                                <p>Total to pay:</p>
+                                <p>£{(parseFloat(sendAmount) || 0).toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <AnimatedButton size="lg" className="w-full mt-6" disabled={isButtonDisabled} onClick={handleOpenSendModal}>
+                            Continue Transaction
+                        </AnimatedButton>
                     </div>
                   </div>
-                  
-                  <div className="mt-8 pt-6 border-t border-dashed">
-                    {error && (
-                       <motion.p initial={{ opacity: 0}} animate={{ opacity: 1}} className="text-center text-red-600 text-sm font-medium mb-4">{error}</motion.p>
-                    )}
-                    <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex justify-between items-center">
-                            <p>Exchange rate:</p>
-                            <p className="font-medium text-gray-800">1 GBP ≈ {(exchangeRate || 0).toFixed(2)} {selectedCountry.currency}</p>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <p>Fee ({(FEE_PERCENTAGE * 100).toFixed(2)}%):</p>
-                            <p className="font-medium text-gray-800">£{fee.toFixed(2)}</p>
-                        </div>
-                        <div className="flex justify-between items-center font-semibold text-gray-800 mt-3 pt-3 border-t">
-                            <p>Total to pay:</p>
-                            <p>£{(parseFloat(sendAmount) || 0).toFixed(2)}</p>
-                        </div>
-                    </div>
-                  </div>
-
-                   <AnimatedButton size="lg" className="w-full mt-8" disabled={isButtonDisabled} onClick={handleOpenSendModal}>
-                        Continue Transaction
-                    </AnimatedButton>
                 </CardContent>
               </Card>
             </motion.div>
-          </TabsContent>
-
-          <TabsContent value="history">
+        )}
+        
+        {activeTab === 'history' && (
              <div className="space-y-6">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
@@ -279,11 +241,9 @@ export function RemittancePage({ onNavigate }: RemittancePageProps) {
                 })}
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+        )}
       </div>
 
-      {/* --- MODALS --- */}
       <AnimatePresence>
         {modalView === 'send' && (
           <CustomModal isOpen={true} onClose={closeModal} title="Complete Your Transfer" description={`Step ${sendStep} of 3`}>
