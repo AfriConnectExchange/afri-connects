@@ -61,7 +61,7 @@ export function AdvertTabs({
       transition={{ delay: 0.2 }}
     >
       <Tabs value={activeTab} onValueChange={onTabChange}>
-        <div className="w-full overflow-x-auto pb-1 no-scrollbar">
+        <div className="w-full overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <TabsList className="inline-flex w-auto mb-6">
             {tabItems.map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="text-sm px-4">

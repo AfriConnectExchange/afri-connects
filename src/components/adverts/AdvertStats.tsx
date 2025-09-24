@@ -69,12 +69,12 @@ export function AdvertStats({ stats }: AdvertStatsProps) {
             transition={{ delay: index * 0.1 }}
           >
             <Card className="hover:shadow-sm transition-shadow">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${getColorClasses(item.color)}`}>
-                  <Icon className="w-5 h-5" />
+              <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${getColorClasses(item.color)}`}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-foreground">
+                  <div className="text-lg sm:text-xl font-bold text-foreground">
                     {item.value}
                   </div>
                   <div className="text-xs text-muted-foreground">
