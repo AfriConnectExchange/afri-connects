@@ -20,6 +20,7 @@ interface Advert {
   createdAt: string;
   expiresAt: string;
   location: string;
+  duration: number;
 }
 
 interface AdvertCardProps {
