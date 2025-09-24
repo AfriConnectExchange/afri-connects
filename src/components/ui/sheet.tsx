@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import * as SheetPrimitive from "@radix-ui/react-dialog@1.1.6";
-import { XIcon } from "lucide-react@0.487.0";
+import * as SheetPrimitive from "@radix-ui/react-dialog";
+import { XIcon } from "lucide-react";
 
 import { cn } from "./utils";
 
@@ -78,7 +78,7 @@ const SheetContent = React.forwardRef<
         <XIcon className="size-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
-    </SheetPrimitive.Content>
+    </SheetContent>
   </SheetPortal>
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;

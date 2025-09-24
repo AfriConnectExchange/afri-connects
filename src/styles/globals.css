@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "./styles/phone-input.css";
+@import "./phone-input.css";
 @custom-variant dark (&:is(.dark *));
 
 :root {
