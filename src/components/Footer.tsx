@@ -23,7 +23,11 @@ const GooglePlayButton = () => (
 
 export function Footer({ onNavigate }: FooterProps) {
   const sponsors = [
-    { name: "Sponsor One", logo: "/sponsor-1.jpg" },
+    { name: "Sponsor One", logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=120" },
+    { name: "Sponsor Two", logo: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=120" },
+    { name: "Sponsor Three", logo: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=120" },
+    { name: "Sponsor Four", logo: "https://images.unsplash.com/photo-1553877522-c369803a6283?w=120" },
+    { name: "Sponsor Five", logo: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=120" },
     ];
 
   const footerLinks = {
