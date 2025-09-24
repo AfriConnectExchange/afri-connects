@@ -311,7 +311,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               size="lg" 
               variant="secondary"
               onClick={() => onNavigate('auth')}
-              className="text-primary w-full sm:w-auto"
+              className="text-primary"
             >
               Get Started Today
               <ArrowRight className="ml-2 w-4 h-4" />
