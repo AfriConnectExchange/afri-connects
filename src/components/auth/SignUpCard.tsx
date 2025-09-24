@@ -134,6 +134,7 @@ export default function SignUpCard({
             </div>
             <AnimatedButton
               type="submit"
+              size="lg"
               className="w-full mt-6"
               isLoading={isLoading}
               animationType="glow"
@@ -178,6 +179,7 @@ export default function SignUpCard({
             </div>
             <AnimatedButton
               type="submit"
+              size="lg"
               className="w-full mt-6"
               isLoading={isLoading}
               animationType="glow"
