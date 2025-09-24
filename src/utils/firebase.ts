@@ -1,17 +1,18 @@
-// src/utils/firebase.ts
-import { initializeApp } from 'firebase/app';
+// Firebase client initializer
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  projectId: "studio-4151499836-4cde0",
-  appId: "1:396542528972:web:45ebcba9aeb1100fab2169",
-  apiKey: "AIzaSyD0lCxMeDtETJ-oESIOiCzRZyAuqWquHAE",
-  authDomain: "studio-4151499836-4cde0.firebaseapp.com",
-  measurementId: "",
-  messagingSenderId: "396542528972"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
 
-export { app };
+export { app, auth };

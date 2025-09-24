@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { projectId, publicAnonKey } from './info';
-import { getAuth } from 'firebase/auth';
-import { app } from '../firebase'; // Import the initialized app
+import { auth } from '../firebase'; // Import the initialized app
 
 // Create a single Supabase client instance to avoid multiple GoTrueClient instances
 export const supabase = createClient(
@@ -10,4 +9,4 @@ export const supabase = createClient(
 );
 
 // Export auth after app is initialized
-export const auth = getAuth(app);
+export { auth };

@@ -1,5 +1,5 @@
 // Firebase client initializer
-import { initializeApp, getApps } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -11,14 +11,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-if (!getApps().length) {
-  // Only initialize if required env vars exist
-  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
-    initializeApp(firebaseConfig);
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn('Firebase client not initialized. Set NEXT_PUBLIC_FIREBASE_* env vars.');
-  }
-}
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
 
-export const auth = getAuth();
+export { app, auth };
