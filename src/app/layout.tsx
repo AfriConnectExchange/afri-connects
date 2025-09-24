@@ -1,3 +1,5 @@
+'use client';
+import React from 'react';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
@@ -8,11 +10,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/ui/cookie-consent";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Afri-Connect",
-  description: "Connecting Africa to the world",
-};
 
 export default function RootLayout({
   children,
