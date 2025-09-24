@@ -2,12 +2,13 @@
 import React from 'react';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "../styles/globals.css";
+import "./../styles/globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuthProvider } from "@/utils/auth/context";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/ui/cookie-consent";
+import { useRouter } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [cartItems, setCartItems] = React.useState<any[]>([]);
+  const router = useRouter();
   const handleNavigate = (page: string) => {
-    // This will be replaced by Next.js Link components
-    console.log("Navigating to", page);
+    router.push(`/${page}`);
   };
    const handleCookieAccept = (preferences: any) => {
     // Initialize analytics, marketing, etc. based on preferences
