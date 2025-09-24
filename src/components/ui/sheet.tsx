@@ -78,7 +78,7 @@ const SheetContent = React.forwardRef<
         <XIcon className="size-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
-    </SheetContent>
+    </SheetPrimitive.Content>
   </SheetPortal>
 ));
 SheetContent.displayName = SheetPrimitive.Content.displayName;

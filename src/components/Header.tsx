@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react';
 import { Search, ShoppingCart, User, Menu, MapPin, X, Bell, TrendingUp } from 'lucide-react';
 import { Button } from './ui/button';
