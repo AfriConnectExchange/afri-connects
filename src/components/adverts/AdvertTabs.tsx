@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Plus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Button } from '../ui/button';
@@ -45,6 +45,15 @@ export function AdvertTabs({
   onDeleteAdvert, 
   stats 
 }: AdvertTabsProps) {
+  const tabItems = [
+    { value: "all", label: "All", count: stats.total },
+    { value: "active", label: "Active", count: stats.active },
+    { value: "paused", label: "Paused", count: stats.paused },
+    { value: "pending", label: "Pending", count: stats.pending },
+    { value: "expired", label: "Expired", count: stats.expired },
+    { value: "draft", label: "Drafts", count: stats.draft }
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,35 +61,26 @@ export function AdvertTabs({
       transition={{ delay: 0.2 }}
     >
       <Tabs value={activeTab} onValueChange={onTabChange}>
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 mb-6 h-10">
-          <TabsTrigger value="all" className="text-xs px-2">
-            All ({stats.total})
-          </TabsTrigger>
-          <TabsTrigger value="active" className="text-xs px-2">
-            Active ({stats.active})
-          </TabsTrigger>
-          <TabsTrigger value="paused" className="text-xs px-2">
-            Paused ({stats.paused})
-          </TabsTrigger>
-          <TabsTrigger value="pending" className="text-xs px-2">
-            Pending ({stats.pending})
-          </TabsTrigger>
-          <TabsTrigger value="expired" className="text-xs px-2">
-            Expired ({stats.expired})
-          </TabsTrigger>
-          <TabsTrigger value="draft" className="text-xs px-2">
-            Draft ({stats.draft})
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto pb-1 no-scrollbar">
+          <TabsList className="inline-flex w-auto mb-6">
+            {tabItems.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value} className="text-sm px-4">
+                {tab.label} <span className="ml-1.5 bg-muted/80 text-muted-foreground rounded-full px-2 py-0.5 text-xs font-mono">{tab.count}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
-        <TabsContent value={activeTab} className="mt-0">
-          <AnimatePresence>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
             {adverts.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12"
-              >
+              <div className="text-center py-16 border-2 border-dashed border-border rounded-xl">
                 <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="w-10 h-10 text-muted-foreground" />
                 </div>
@@ -98,9 +98,9 @@ export function AdvertTabs({
                   <Plus className="w-4 h-4" />
                   Create Your First Advert
                 </Button>
-              </motion.div>
+              </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {adverts.map((advert, index) => (
                   <AdvertCard
                     key={advert.id}
@@ -112,8 +112,8 @@ export function AdvertTabs({
                 ))}
               </div>
             )}
-          </AnimatePresence>
-        </TabsContent>
+          </motion.div>
+        </AnimatePresence>
       </Tabs>
     </motion.div>
   );

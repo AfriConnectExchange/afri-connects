@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Plus, BarChart3, TrendingUp, Eye, CheckCircle, Clock, PauseCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { AdvertHeader } from './adverts/AdvertHeader';
 import { AdvertStats } from './adverts/AdvertStats';
 import { AdvertFilters } from './adverts/AdvertFilters';
 import { AdvertTabs } from './adverts/AdvertTabs';
 import { AdvertModal } from './adverts/AdvertModal';
 import { AdvertAlert } from './adverts/AdvertAlert';
+import { ConfirmationModal } from './ui/confirmation-modal';
 
 interface AdvertsPageProps {
   onNavigate: (page: string) => void;
@@ -58,6 +61,21 @@ const mockAdverts: Advert[] = [
     expiresAt: '2024-02-03',
     location: 'Accra, Ghana'
   },
+    {
+    id: '5',
+    title: 'Handcrafted Beaded Jewelry Sets',
+    description: 'Authentic Maasai beaded jewelry, perfect for any occasion. Custom designs available.',
+    image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+    category: 'Fashion & Textiles',
+    price: '£50-250',
+    duration: 60,
+    status: 'paused',
+    views: 543,
+    clicks: 21,
+    createdAt: '2024-01-18',
+    expiresAt: '2024-03-18',
+    location: 'Nairobi, Kenya'
+  },
   {
     id: '3',
     title: 'Handcrafted Wooden Furniture',
@@ -110,6 +128,7 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedAdvert, setSelectedAdvert] = useState<Advert | null>(null);
+  const [advertToDelete, setAdvertToDelete] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState<'success' | 'error' | 'warning' | 'info'>('success');
@@ -182,9 +201,12 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
     }
   };
 
-  const handleDeleteAdvert = (id: string) => {
-    setAdverts(prev => prev.filter(advert => advert.id !== id));
-    showAlertMessage('success', 'Advert deleted successfully');
+  const confirmDeleteAdvert = () => {
+    if (advertToDelete) {
+      setAdverts(prev => prev.filter(advert => advert.id !== advertToDelete));
+      showAlertMessage('success', 'Advert deleted successfully');
+      setAdvertToDelete(null);
+    }
   };
 
   const handleOpenEditModal = (advert: Advert) => {
@@ -221,7 +243,7 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
           adverts={filteredAdverts}
           onCreateAdvert={() => setShowCreateModal(true)}
           onEditAdvert={handleOpenEditModal}
-          onDeleteAdvert={handleDeleteAdvert}
+          onDeleteAdvert={setAdvertToDelete}
           stats={stats}
         />
       </div>
@@ -252,6 +274,17 @@ export function AdvertsPage({ onNavigate }: AdvertsPageProps) {
         isVisible={showAlert}
         message={alertMessage}
         type={alertType}
+      />
+      
+      {/* Delete Confirmation */}
+      <ConfirmationModal
+        isOpen={!!advertToDelete}
+        onClose={() => setAdvertToDelete(null)}
+        onConfirm={confirmDeleteAdvert}
+        title="Delete Advert"
+        description="Are you sure you want to delete this advert? This action cannot be undone."
+        confirmText="Delete"
+        type="destructive"
       />
     </div>
   );

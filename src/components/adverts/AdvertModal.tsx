@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
@@ -26,12 +26,26 @@ export function AdvertModal({
   categories 
 }: AdvertModalProps) {
   const [formData, setFormData] = useState({
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    category: initialData?.category || '',
-    price: initialData?.price || '',
-    duration: initialData?.duration || 30
+    title: '',
+    description: '',
+    category: '',
+    price: '',
+    duration: 30
   });
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        category: initialData.category || '',
+        price: initialData.price || '',
+        duration: initialData.duration || 30
+      });
+    } else if (!isOpen) {
+       setFormData({ title: '', description: '', category: '', price: '', duration: 30 });
+    }
+  }, [isOpen, initialData]);
 
   const handleSubmit = () => {
     if (!formData.title || !formData.category || !formData.price || !formData.description) {
@@ -39,20 +53,13 @@ export function AdvertModal({
     }
     onSubmit(formData);
     onClose();
-    setFormData({
-      title: '',
-      description: '',
-      category: '',
-      price: '',
-      duration: 30
-    });
   };
 
   const isValid = formData.title && formData.category && formData.price && formData.description;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
           <DialogTitle className="text-lg">
             {isEdit ? "Edit Advert" : "Create New Advert"}
@@ -70,7 +77,7 @@ export function AdvertModal({
             <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
-              placeholder="Enter advert title"
+              placeholder="e.g., Premium African Textiles"
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
             />
@@ -86,7 +93,7 @@ export function AdvertModal({
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.slice(1).map(category => (
+                {categories.filter(c => c !== 'All Categories').map(category => (
                   <SelectItem key={category} value={category}>
                     {category}
                   </SelectItem>
@@ -96,17 +103,17 @@ export function AdvertModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price Range *</Label>
+            <Label htmlFor="price">Price / Price Range *</Label>
             <Input
               id="price"
-              placeholder="e.g., £25-150"
+              placeholder="e.g., £25 or £25-150"
               value={formData.price}
               onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Duration</Label>
+            <Label htmlFor="duration">Campaign Duration</Label>
             <Select
               value={formData.duration.toString()}
               onValueChange={(value) => setFormData(prev => ({ ...prev, duration: parseInt(value) }))}
@@ -117,7 +124,7 @@ export function AdvertModal({
               <SelectContent>
                 <SelectItem value="7">7 days</SelectItem>
                 <SelectItem value="14">14 days</SelectItem>
-                <SelectItem value="30">30 days</SelectItem>
+                <SelectItem value="30">30 days (Recommended)</SelectItem>
                 <SelectItem value="60">60 days</SelectItem>
               </SelectContent>
             </Select>
@@ -145,18 +152,18 @@ export function AdvertModal({
           {/* Side by side buttons */}
           <div className="flex gap-3 pt-2">
             <Button
-              onClick={handleSubmit}
-              className="flex-1"
-              disabled={!isValid}
-            >
-              {isEdit ? 'Update' : 'Create'} Advert
-            </Button>
-            <Button
               variant="outline"
               onClick={onClose}
               className="flex-1"
             >
               Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="flex-1"
+              disabled={!isValid}
+            >
+              {isEdit ? 'Update' : 'Create'} Advert
             </Button>
           </div>
         </div>
