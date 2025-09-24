@@ -1,5 +1,6 @@
+
 import { motion } from 'framer-motion';
-import { MoreVertical, Edit, Trash2, Eye, TrendingUp, Tag, Calendar, MapPin, Play, Pause, Power } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, Eye, TrendingUp, Tag, Calendar, MapPin, Play, Pause, Power, BarChart3 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
