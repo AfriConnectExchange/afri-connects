@@ -59,7 +59,7 @@ export function AdvertModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-lg">
             {isEdit ? "Edit Advert" : "Create New Advert"}
@@ -72,7 +72,7 @@ export function AdvertModal({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto pr-6 pl-1 -mr-5 space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
             <Input
@@ -149,8 +149,9 @@ export function AdvertModal({
             </AlertDescription>
           </Alert>
 
+        </div>
           {/* Side by side buttons */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-2 border-t mt-4">
             <Button
               variant="outline"
               onClick={onClose}
@@ -166,7 +167,6 @@ export function AdvertModal({
               {isEdit ? 'Update' : 'Create'} Advert
             </Button>
           </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
