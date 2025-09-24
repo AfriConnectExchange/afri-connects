@@ -8,7 +8,6 @@ import { Footer } from "@/components/Footer";
 import { AuthProvider } from "@/utils/auth/context";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/ui/cookie-consent";
-import { useRouter } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [cartItems, setCartItems] = React.useState<any[]>([]);
-  const router = useRouter();
-  const handleNavigate = (page: string) => {
-    router.push(`/${page}`);
-  };
-   const handleCookieAccept = (preferences: any) => {
+  const handleCookieAccept = (preferences: any) => {
     // Initialize analytics, marketing, etc. based on preferences
     if (preferences.analytics) {
       console.log('Analytics tracking enabled');
@@ -46,11 +41,10 @@ export default function RootLayout({
           <div className="min-h-screen bg-background flex flex-col">
             <Header
               currentPage={"home"} // This can be dynamic with usePathname
-              onNavigate={handleNavigate}
               cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
             />
             <main className="flex-grow">{children}</main>
-            <Footer onNavigate={handleNavigate} />
+            <Footer />
             <Toaster />
             <CookieConsent onAccept={handleCookieAccept} onDecline={handleCookieDecline} />
           </div>

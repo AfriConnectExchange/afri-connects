@@ -4,12 +4,12 @@ import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface HomePageProps {
-  onNavigate: (page: string) => void;
 }
 
-export function HomePage({ onNavigate }: HomePageProps) {
+export function HomePage({}: HomePageProps) {
   const featuredProducts = [
     {
       id: 1,
@@ -36,7 +36,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       rating: 4.7,
       reviews: 156,
       seller: "Ankara Fashion",
-      image: "https://images.unsplash.com/photo-1692689383138-c2df3476072c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwbWFya2V0cGxhY2UlMjBjb2xvcmZ1bCUyMHByb2R1Y3RzfGVufDF8fHx8MTc1ODEyMTQ3NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      image: "https://images.unsplash.com/photo-1692689383138-c2df3476072c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwbWFya2V0cGxhY2UlMjBjb2xvcmZ1bCUyMHByb2R1Y3RzfGVufDF8fHx8MTc1ODEyMTQ3NXww&ixlib.rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
     },
     {
       id: 4,
@@ -45,7 +45,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
       rating: 4.6,
       reviews: 203,
       seller: "Natural Beauty Co",
-      image: "https://images.unsplash.com/photo-1692689383138-c2df3476072c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwbWFya2V0cGxhY2UlMjBjb2xvcmZ1bCUyMHByb2R1Y3RzfGVufDF8fHx8MTc1ODEyMTQ3NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      image: "https://images.unsplash.com/photo-1692689383138-c2df3476072c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwbWFya2V0cGxhY2UlMjBjb2xvcmZ1bCUyMHByb2R1Y3RzfGVufDF8fHx8MTc1ODEyMTQ3NXww&ixlib.rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
     }
   ];
 
@@ -89,23 +89,25 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 and seamless money transfers. Built by Africans, for Africa.
               </p>
               <div className="flex flex-row gap-3 md:gap-4">
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  onClick={() => onNavigate('marketplace')}
-                  className="text-primary flex-1"
-                >
-                  Explore
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200 flex-1"
-                  onClick={() => onNavigate('auth')}
-                >
-                  Sell
-                </Button>
+                <Link href="/marketplace" passHref>
+                  <Button 
+                    size="lg" 
+                    variant="secondary"
+                    className="text-primary flex-1"
+                  >
+                    Explore
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+                <Link href="/auth" passHref>
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200 flex-1"
+                  >
+                    Sell
+                  </Button>
+                </Link>
               </div>
             </motion.div>
             <motion.div 
@@ -199,14 +201,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">
             <h2 className="text-xl md:text-2xl">Featured Products</h2>
-            <Button 
-              variant="outline"
-              onClick={() => onNavigate('marketplace')}
-              size="sm"
-            >
-              View All
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            <Link href="/marketplace" passHref>
+              <Button 
+                variant="outline"
+                size="sm"
+              >
+                View All
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {featuredProducts.map((product, index) => (
@@ -217,30 +220,32 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300" onClick={() => onNavigate('product')}>
-                  <CardContent className="p-0">
-                    <div className="relative overflow-hidden rounded-t-lg">
-                      <ImageWithFallback
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <Badge className="absolute top-2 left-2 bg-primary text-xs">
-                        Featured
-                      </Badge>
-                    </div>
-                    <div className="p-3 md:p-4">
-                      <h3 className="mb-2 line-clamp-2 text-sm md:text-base">{product.name}</h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs md:text-sm">{product.rating}</span>
-                        <span className="text-xs md:text-sm text-muted-foreground">({product.reviews})</span>
+                <Link href={`/product/${product.id}`} passHref>
+                  <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300">
+                    <CardContent className="p-0">
+                      <div className="relative overflow-hidden rounded-t-lg">
+                        <ImageWithFallback
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <Badge className="absolute top-2 left-2 bg-primary text-xs">
+                          Featured
+                        </Badge>
                       </div>
-                      <p className="text-xs md:text-sm text-muted-foreground mb-2">by {product.seller}</p>
-                      <p className="text-base md:text-lg font-semibold text-primary">{product.price}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="p-3 md:p-4">
+                        <h3 className="mb-2 line-clamp-2 text-sm md:text-base">{product.name}</h3>
+                        <div className="flex items-center gap-1 mb-2">
+                          <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs md:text-sm">{product.rating}</span>
+                          <span className="text-xs md:text-sm text-muted-foreground">({product.reviews})</span>
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground mb-2">by {product.seller}</p>
+                        <p className="text-base md:text-lg font-semibold text-primary">{product.price}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -252,14 +257,15 @@ export function HomePage({ onNavigate }: HomePageProps) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">
             <h2 className="text-xl md:text-2xl">Popular Courses</h2>
-            <Button 
-              variant="outline"
-              onClick={() => onNavigate('courses')}
-              size="sm"
-            >
-              View All Courses
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            <Link href="/courses" passHref>
+              <Button 
+                variant="outline"
+                size="sm"
+              >
+                View All Courses
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {featuredCourses.map((course, index) => (
@@ -270,23 +276,25 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300" onClick={() => onNavigate('courses')}>
-                  <CardContent className="p-4 md:p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <Badge variant="secondary" className="text-xs">{course.duration}</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs md:text-sm">{course.rating}</span>
+                <Link href="/courses" passHref>
+                  <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <Badge variant="secondary" className="text-xs">{course.duration}</Badge>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs md:text-sm">{course.rating}</span>
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="mb-2 text-sm md:text-base line-clamp-2">{course.title}</h3>
-                    <p className="text-xs md:text-sm text-muted-foreground mb-4">by {course.instructor}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs md:text-sm text-muted-foreground">{course.students} students</span>
-                      <span className="text-base md:text-lg font-semibold text-primary">{course.price}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <h3 className="mb-2 text-sm md:text-base line-clamp-2">{course.title}</h3>
+                      <p className="text-xs md:text-sm text-muted-foreground mb-4">by {course.instructor}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs md:text-sm text-muted-foreground">{course.students} students</span>
+                        <span className="text-base md:text-lg font-semibold text-primary">{course.price}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -307,15 +315,16 @@ export function HomePage({ onNavigate }: HomePageProps) {
               Whether you're looking to buy authentic African products, sell your crafts, 
               or learn new skills, we've got you covered.
             </p>
-            <Button 
-              size="lg" 
-              variant="secondary"
-              onClick={() => onNavigate('auth')}
-              className="text-primary"
-            >
-              Get Started Today
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            <Link href="/auth" passHref>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                className="text-primary"
+              >
+                Get Started Today
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>

@@ -140,7 +140,7 @@ const categories = [
   { id: 'technology', name: 'Technology', count: 6 }
 ];
 
-export function CoursesPage({ onNavigate }: CoursesPageProps) {
+export function CoursesPage({}: CoursesPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [priceFilter, setPriceFilter] = useState('all');
@@ -317,7 +317,6 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
               
               <button
                 type="button"
-                onClick={() => onNavigate('auth')}
                 className="flex items-center gap-2 px-6 py-2 rounded-full font-bold bg-gradient-to-r from-primary to-primary/80 text-white shadow-xl transition-all duration-300 hover:from-primary/90 hover:to-primary/70 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/60 active:scale-95 border-0 text-base"
                 style={{ boxShadow: '0 4px 16px 0 rgba(0,0,0,0.10)' }}
               >
@@ -487,7 +486,7 @@ export function CoursesPage({ onNavigate }: CoursesPageProps) {
               Join thousands of African professionals and entrepreneurs who are advancing their careers with our expert-led courses.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="text-primary" onClick={() => onNavigate('auth')}>
+              <Button size="lg" variant="secondary" className="text-primary">
                 Create Free Account
               </Button>
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">

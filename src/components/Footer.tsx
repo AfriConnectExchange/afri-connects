@@ -4,7 +4,6 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import Link from 'next/link';
 
 interface FooterProps {
-  onNavigate: (page: string) => void;
 }
 
 // App Store badge (from public folder)
@@ -22,7 +21,7 @@ const GooglePlayButton = () => (
 );
 
 
-export function Footer({ onNavigate }: FooterProps) {
+export function Footer({}: FooterProps) {
   const sponsors = [
     { name: "Sponsor One", logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=120" },
     { name: "Sponsor Two", logo: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=120" },

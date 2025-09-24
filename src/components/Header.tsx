@@ -5,21 +5,23 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {
   currentPage: string;
-  onNavigate: (page: string) => void;
   cartCount: number;
 }
 
-export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
+export function Header({}: HeaderProps) {
+  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
 
   const navigationItems = [
     { id: 'marketplace', label: 'Marketplace', href: '/marketplace' },
     { id: 'courses', label: 'Courses', href: '/courses' },
-    { id: 'money-transfer', label: 'Send Money', href: '/money-transfer' },
+    { id: 'money-transfer', label: 'Send Money', href: '/remittance' },
     { id: 'adverts', label: 'My Adverts', icon: TrendingUp, href: '/adverts' }
   ];
 
@@ -34,7 +36,6 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
 
   const handleMobileLinkClick = (href: string) => {
     setMobileMenuOpen(false);
-    // Navigation is handled by Link component
   };
 
 
@@ -74,7 +75,7 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
                     {navigationItems.map((item) => (
                       <Link key={item.id} href={item.href} passHref>
                         <Button
-                          variant={currentPage === item.id ? "secondary" : "ghost"}
+                          variant={pathname === item.href ? "secondary" : "ghost"}
                           className="w-full justify-start text-base py-6"
                           onClick={() => handleMobileLinkClick(item.href)}
                         >
@@ -92,7 +93,7 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
                       {additionalItems.map((item) => (
                          <Link key={item.id} href={item.href} passHref>
                           <Button
-                            variant={currentPage === item.id ? "secondary" : "ghost"}
+                            variant={pathname === item.href ? "secondary" : "ghost"}
                             className="w-full justify-start"
                             onClick={() => handleMobileLinkClick(item.href)}
                           >
@@ -158,7 +159,7 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      className={`${currentPage === item.id ? 'bg-accent' : ''}`}
+                      className={`${pathname === item.href ? 'bg-accent' : ''}`}
                     >
                       {item.label}
                     </Button>
