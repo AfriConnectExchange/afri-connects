@@ -1,6 +1,7 @@
 // FILE: src/components/Footer.jsx
 import { ArrowRight, Twitter, Instagram, Linkedin, Facebook } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import Link from 'next/link';
 
 interface FooterProps {
   onNavigate: (page: string) => void;
@@ -32,20 +33,20 @@ export function Footer({ onNavigate }: FooterProps) {
 
   const footerLinks = {
     platform: [
-      { label: "Marketplace", page: "marketplace" },
-      { label: "Courses", page: "courses" },
-      { label: "Money Transfer", page: "money-transfer" },
-      { label: "Order Tracking", page: "tracking" },
+      { label: "Marketplace", page: "/marketplace" },
+      { label: "Courses", page: "/courses" },
+      { label: "Money Transfer", page: "/money-transfer" },
+      { label: "Order Tracking", page: "/tracking" },
     ],
     company: [
-      { label: "About Us", page: "about" }, // Assuming an 'about' page
-      { label: "Careers", page: "careers" }, // Assuming a 'careers' page
-      { label: "Support", page: "support" },
-      { label: "Help Center", page: "help" },
+      { label: "About Us", page: "/about" },
+      { label: "Careers", page: "/careers" },
+      { label: "Support", page: "/support" },
+      { label: "Help Center", page: "/help" },
     ],
     legal: [
-      { label: "Terms of Service", page: "terms" }, // Assuming a 'terms' page
-      { label: "Privacy Policy", page: "privacy" }, // Assuming a 'privacy' page
+      { label: "Terms of Service", page: "/terms" },
+      { label: "Privacy Policy", page: "/privacy" },
     ]
   };
 
@@ -61,7 +62,6 @@ export function Footer({ onNavigate }: FooterProps) {
                 key={sponsor.name}
                 src={sponsor.logo}
                 alt={sponsor.name}
-                // --- THIS IS THE LINE I CHANGED ---
                 className="h-12 object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
               />
             ))}
@@ -91,9 +91,9 @@ export function Footer({ onNavigate }: FooterProps) {
               <ul className="space-y-2">
                 {footerLinks.platform.map(link => (
                   <li key={link.page}>
-                    <a onClick={() => onNavigate(link.page)} className="text-sm hover:text-primary cursor-pointer transition-colors">
+                    <Link href={link.page} className="text-sm hover:text-primary cursor-pointer transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -103,9 +103,9 @@ export function Footer({ onNavigate }: FooterProps) {
               <ul className="space-y-2">
                 {footerLinks.company.map(link => (
                   <li key={link.page}>
-                    <a onClick={() => onNavigate(link.page)} className="text-sm hover:text-primary cursor-pointer transition-colors">
+                    <Link href={link.page} className="text-sm hover:text-primary cursor-pointer transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -115,9 +115,9 @@ export function Footer({ onNavigate }: FooterProps) {
               <ul className="space-y-2">
                 {footerLinks.legal.map(link => (
                   <li key={link.page}>
-                    <a onClick={() => onNavigate(link.page)} className="text-sm hover:text-primary cursor-pointer transition-colors">
+                    <Link href={link.page} className="text-sm hover:text-primary cursor-pointer transition-colors">
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

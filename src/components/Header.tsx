@@ -3,6 +3,7 @@ import { Search, ShoppingCart, User, Menu, MapPin, X, Bell, TrendingUp } from 'l
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
+import Link from 'next/link';
 
 interface HeaderProps {
   currentPage: string;
@@ -15,25 +16,26 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigationItems = [
-    { id: 'marketplace', label: 'Marketplace' },
-    { id: 'courses', label: 'Courses' },
-    { id: 'money-transfer', label: 'Send Money' },
-    { id: 'adverts', label: 'My Adverts', icon: TrendingUp }
+    { id: 'marketplace', label: 'Marketplace', href: '/marketplace' },
+    { id: 'courses', label: 'Courses', href: '/courses' },
+    { id: 'money-transfer', label: 'Send Money', href: '/money-transfer' },
+    { id: 'adverts', label: 'My Adverts', icon: TrendingUp, href: '/adverts' }
   ];
 
   const additionalItems = [
-    { id: 'tracking', label: 'Track Orders' },
-    { id: 'analytics', label: 'Analytics' },
-    { id: 'reviews', label: 'Reviews' },
-    { id: 'admin', label: 'Admin Panel' },
-    { id: 'help', label: 'Help Center' },
-    { id: 'support', label: 'Support' }
+    { id: 'tracking', label: 'Track Orders', href: '/tracking' },
+    { id: 'analytics', label: 'Analytics', href: '/analytics' },
+    { id: 'reviews', label: 'Reviews', href: '/reviews' },
+    { id: 'admin', label: 'Admin Panel', href: '/admin' },
+    { id: 'help', label: 'Help Center', href: '/help' },
+    { id: 'support', label: 'Support', href: '/support' }
   ];
 
-  const handleNavigate = (page: string) => {
-    onNavigate(page);
+  const handleMobileLinkClick = (href: string) => {
     setMobileMenuOpen(false);
+    // Navigation is handled by Link component
   };
+
 
   return (
     <header className="border-b bg-white sticky top-0 z-50">
@@ -58,23 +60,26 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
             <SheetContent side="left" className="w-80 p-4">
               <div className="flex flex-col h-full">
                 <div className="flex items-center gap-2 mb-6 px-2">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold">AC</span>
-                  </div>
-                  <span className="text-xl font-bold text-primary">AfriConnect</span>
+                  <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold">AC</span>
+                    </div>
+                    <span className="text-xl font-bold text-primary">AfriConnect</span>
+                  </Link>
                 </div>
                 
                 <div className="flex-1 overflow-y-auto pr-2">
                   <div className="space-y-2">
                     {navigationItems.map((item) => (
-                      <Button
-                        key={item.id}
-                        variant={currentPage === item.id ? "secondary" : "ghost"}
-                        className="w-full justify-start text-base py-6"
-                        onClick={() => handleNavigate(item.id)}
-                      >
-                        {item.label}
-                      </Button>
+                      <Link key={item.id} href={item.href} passHref>
+                        <Button
+                          variant={currentPage === item.id ? "secondary" : "ghost"}
+                          className="w-full justify-start text-base py-6"
+                          onClick={() => handleMobileLinkClick(item.href)}
+                        >
+                          {item.label}
+                        </Button>
+                      </Link>
                     ))}
                   </div>
                   
@@ -84,36 +89,41 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
                     <p className="text-xs text-muted-foreground mb-2 px-3">More Features</p>
                     <div className="space-y-1">
                       {additionalItems.map((item) => (
-                        <Button
-                          key={item.id}
-                          variant={currentPage === item.id ? "secondary" : "ghost"}
-                          className="w-full justify-start"
-                          onClick={() => handleNavigate(item.id)}
-                        >
-                          {item.label}
-                        </Button>
+                         <Link key={item.id} href={item.href} passHref>
+                          <Button
+                            variant={currentPage === item.id ? "secondary" : "ghost"}
+                            className="w-full justify-start"
+                            onClick={() => handleMobileLinkClick(item.href)}
+                          >
+                            {item.label}
+                          </Button>
+                        </Link>
                       ))}
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t mt-4 pt-4">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => handleNavigate('notifications')}
-                  >
-                    <Bell className="w-4 h-4 mr-2" />
-                    Notifications
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => handleNavigate('profile')}
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Account
-                  </Button>
+                   <Link href="/notifications" passHref>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                         onClick={() => handleMobileLinkClick('/notifications')}
+                      >
+                        <Bell className="w-4 h-4 mr-2" />
+                        Notifications
+                      </Button>
+                   </Link>
+                   <Link href="/profile" passHref>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                         onClick={() => handleMobileLinkClick('/profile')}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Account
+                      </Button>
+                   </Link>
                 </div>
               </div>
             </SheetContent>
@@ -121,12 +131,13 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
 
           <div 
             className="flex items-center gap-2 cursor-pointer flex-1 lg:flex-none justify-center lg:justify-start min-w-0"
-            onClick={() => onNavigate('home')}
           >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-base">AC</span>
-            </div>
-            <span className="text-lg lg:text-xl font-bold text-primary truncate">AfriConnect</span>
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                <span className="text-white font-bold text-base">AC</span>
+              </div>
+              <span className="text-lg lg:text-xl font-bold text-primary truncate">AfriConnect</span>
+            </Link>
           </div>
 
           <div className="hidden lg:block flex-1 max-w-lg mx-8">
@@ -142,68 +153,72 @@ export function Header({ currentPage, onNavigate, cartCount }: HeaderProps) {
           <div className="flex items-center gap-2 shrink-0">
             <div className="hidden lg:flex items-center gap-2">
               {navigationItems.map((item) => (
-                <Button 
-                  key={item.id}
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => onNavigate(item.id)}
-                  className={`${currentPage === item.id ? 'bg-accent' : ''}`}
-                >
-                  {item.label}
-                </Button>
+                <Link key={item.id} href={item.href} passHref>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className={`${currentPage === item.id ? 'bg-accent' : ''}`}
+                    >
+                      {item.label}
+                    </Button>
+                </Link>
               ))}
             </div>
             
             <div className="hidden md:flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="relative h-9 w-9"
-                  onClick={() => onNavigate('cart')}
-                  aria-label={`Shopping cart${cartCount > 0 ? ` (${cartCount} items)` : ''}`}
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => onNavigate('notifications')}
-                  className="h-9 w-9 relative"
-                >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    2
-                  </span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => onNavigate('profile')}
-                  className="h-9 w-9"
-                >
-                  <User className="w-5 h-5" />
-                </Button>
+                <Link href="/cart" passHref>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="relative h-9 w-9"
+                      aria-label={`Shopping cart${cartCount > 0 ? ` (${cartCount} items)` : ''}`}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      {cartCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {cartCount}
+                        </span>
+                      )}
+                    </Button>
+                </Link>
+                <Link href="/notifications" passHref>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-9 w-9 relative"
+                    >
+                      <Bell className="w-5 h-5" />
+                      <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                        2
+                      </span>
+                    </Button>
+                </Link>
+                 <Link href="/profile" passHref>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-9 w-9"
+                    >
+                      <User className="w-5 h-5" />
+                    </Button>
+                </Link>
             </div>
 
             <div className="flex md:hidden items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative h-9 w-9"
-                onClick={() => onNavigate('cart')}
-              >
-                <ShoppingCart className="w-4 h-4" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
-              </Button>
+                <Link href="/cart" passHref>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="relative h-9 w-9"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                        {cartCount > 9 ? '9+' : cartCount}
+                      </span>
+                    )}
+                  </Button>
+              </Link>
             </div>
           </div>
         </div>
