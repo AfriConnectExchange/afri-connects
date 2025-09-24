@@ -63,7 +63,7 @@ export function ProductCard({
         <CardContent className="p-0 flex-1 flex flex-col">
           <div className="relative overflow-hidden">
             <div
-              className="aspect-square w-full cursor-pointer"
+              className="aspect-[4/3] w-full cursor-pointer"
               onClick={() => onNavigate('product', product.id)}
             >
               <ImageWithFallback
