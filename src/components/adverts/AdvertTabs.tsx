@@ -64,7 +64,7 @@ export function AdvertTabs({
         <div className="w-full overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <TabsList className="inline-flex w-auto mb-6">
             {tabItems.map(tab => (
-              <TabsTrigger key={tab.value} value={tab.value} className="text-sm px-4">
+              <TabsTrigger key={tab.value} value={tab.value} className="text-sm px-3">
                 {tab.label} <span className="ml-1.5 bg-muted/80 text-muted-foreground rounded-full px-2 py-0.5 text-xs font-mono">{tab.count}</span>
               </TabsTrigger>
             ))}
