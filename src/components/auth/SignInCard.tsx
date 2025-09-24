@@ -20,10 +20,9 @@ export default function SignInCard({
   showPassword,
   setShowPassword,
   isLoading,
-  simulateEmailLogin,
+  handleEmailLogin,
   simulatePhoneAuth,
   showAlert,
-  SIMULATION_MODE,
   onSwitch
 }: Props) {
   return (
@@ -58,7 +57,7 @@ export default function SignInCard({
         </div>
         {/* Form Fields */}
         {authMethod === 'email' ? (
-          <form onSubmit={e => { e.preventDefault(); simulateEmailLogin(); }} className="space-y-4">
+          <form onSubmit={e => { e.preventDefault(); handleEmailLogin(); }} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -126,11 +125,6 @@ export default function SignInCard({
         )}
         {/* Additional Options */}
         <div className="mt-6 text-center space-y-2">
-          {SIMULATION_MODE && (
-            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
-              <strong>Demo Mode:</strong> Use any email/phone. For OTP, use: 123456
-            </div>
-          )}
           <button
             onClick={() => showAlert('info', 'Password Reset', 'Password reset link would be sent to your email.')}
             className="text-sm text-primary hover:underline"

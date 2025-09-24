@@ -23,10 +23,9 @@ export default function SignUpCard({
   showConfirmPassword,
   setShowConfirmPassword,
   isLoading,
-  simulateEmailRegistration,
+  handleEmailRegistration,
   simulatePhoneAuth,
   showAlert,
-  SIMULATION_MODE,
   onSwitch
 }: Props) {
   return (
@@ -61,7 +60,7 @@ export default function SignUpCard({
         </div>
         {/* Form Fields */}
         {authMethod === 'email' ? (
-          <form onSubmit={e => { e.preventDefault(); simulateEmailRegistration(); }} className="space-y-4">
+          <form onSubmit={e => { e.preventDefault(); handleEmailRegistration(); }} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -189,11 +188,6 @@ export default function SignUpCard({
         )}
         {/* Additional Options */}
         <div className="mt-6 text-center space-y-2">
-          {SIMULATION_MODE && (
-            <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
-              <strong>Demo Mode:</strong> Use any email/phone. For OTP, use: 123456
-            </div>
-          )}
           <div className="text-sm mt-4">
             Already have an account?{' '}
             <button onClick={onSwitch} className="text-primary hover:underline font-semibold">Sign in</button>

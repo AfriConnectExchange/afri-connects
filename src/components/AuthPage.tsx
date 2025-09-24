@@ -12,6 +12,7 @@ import SignUpCard from './auth/SignUpCard';
 import OTPVerification from './auth/OTPVerification';
 import { AnimatedButton } from './ui/animated-button';
 import { useAuth } from '../utils/auth/context';
+import { useSignUp, useSignIn } from '../utils/api/hooks';
 
 interface AuthPageProps {
   onNavigate: (page: string) => void;
@@ -48,7 +49,12 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
   const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const { mutate: signUp, loading: signUpLoading, error: signUpError, reset: resetSignUp } = useSignUp();
+  const { mutate: signIn, loading: signInLoading, error: signInError, reset: resetSignIn } = useSignIn();
+
+  const isLoading = signUpLoading || signInLoading;
+
   const [alertState, setAlertState] = useState<{
     isOpen: boolean;
     type: 'success' | 'error' | 'warning' | 'info';
@@ -87,6 +93,18 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     }
   }, [user, session, onNavigate]);
 
+  useEffect(() => {
+    if (signUpError) {
+      showAlert('error', 'Registration Failed', signUpError);
+      resetSignUp();
+    }
+    if (signInError) {
+      showAlert('error', 'Sign-in Failed', signInError);
+      resetSignIn();
+    }
+  }, [signUpError, signInError]);
+
+
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -109,85 +127,62 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     return phoneRegex.test(phone);
   };
 
-  // Simulation functions
-  const simulateEmailLogin = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+  // NEW: Real sign in logic
+  const handleEmailLogin = async () => {
     if (!validateEmail(formData.email)) {
       showAlert('error', 'Invalid Email', 'Please enter a valid email address.');
-      setIsLoading(false);
       return;
     }
-    
     if (!formData.password) {
       showAlert('error', 'Password Required', 'Please enter your password.');
-      setIsLoading(false);
       return;
     }
 
-    // Simulate successful login
-    showAlert('success', 'Welcome Back!', 'You have successfully signed in to AfriConnect.');
-    setTimeout(() => {
-      onNavigate('home');
-    }, 1500);
-    setIsLoading(false);
+    const result = await signIn({ email: formData.email, password: formData.password });
+    if (result) {
+      showAlert('success', 'Welcome Back!', 'You have successfully signed in.');
+      // The onAuthStateChange listener in AuthProvider will handle navigation
+    }
   };
 
-  const simulateEmailRegistration = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+  // NEW: Real registration logic
+  const handleEmailRegistration = async () => {
     if (!validateEmail(formData.email)) {
       showAlert('error', 'Invalid Email', 'Please enter a valid email address.');
-      setIsLoading(false);
       return;
     }
-    
-    if (!validatePassword(formData.password)) {
-      showAlert('error', 'Weak Password', 'Password must be at least 8 characters long.');
-      setIsLoading(false);
-      return;
-    }
-    
     if (formData.password !== formData.confirmPassword) {
       showAlert('error', 'Password Mismatch', 'Passwords do not match.');
-      setIsLoading(false);
       return;
     }
-
     if (!formData.acceptTerms) {
       showAlert('error', 'Terms Required', 'Please accept the terms and conditions.');
-      setIsLoading(false);
       return;
     }
 
-    // Simulate email verification step
-    showAlert('success', 'Account Created!', 'Please check your email for verification.');
-    setStep('verify-email');
-    setIsLoading(false);
+    const result = await signUp({
+      email: formData.email,
+      password: formData.password,
+      name: formData.name
+    });
+
+    if (result) {
+      showAlert('success', 'Account Created!', 'You can now sign in with your new account.');
+      setShowSignIn(true); // Switch to sign-in view
+    }
   };
 
+
   const simulatePhoneAuth = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
     if (!validatePhone(formData.phone)) {
       showAlert('error', 'Invalid Phone', 'Please enter a valid phone number.');
-      setIsLoading(false);
       return;
     }
-
-    // Simulate OTP sent
     showAlert('success', 'OTP Sent!', `Verification code sent to ${formData.phone}`);
     setStep('verify-otp');
-    setIsLoading(false);
   };
 
   const handleOTPComplete = async (otp: string) => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     // Simulate OTP verification
     if (otp === '123456') {
       if (authType === 'register') {
@@ -202,22 +197,15 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     } else {
       showAlert('error', 'Invalid OTP', 'Please enter the correct verification code. Use 123456 for testing.');
     }
-    setIsLoading(false);
   };
 
   const simulateCompleteProfile = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     if (!formData.firstName || !formData.lastName) {
       showAlert('error', 'Name Required', 'Please enter your first and last name.');
-      setIsLoading(false);
       return;
     }
 
-    // Simulate profile completion
     setStep('success');
-    setIsLoading(false);
   };
 
   const handleResendOTP = async () => {
@@ -281,7 +269,7 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
     );
   }
 
-  // Email verification screen
+  // Email verification screen (can be removed if auto-confirming, but good to keep for later)
   if (step === 'verify-email') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
@@ -468,10 +456,9 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
             showPassword={showPassword}
             setShowPassword={setShowPassword}
             isLoading={isLoading}
-            simulateEmailLogin={simulateEmailLogin}
+            handleEmailLogin={handleEmailLogin}
             simulatePhoneAuth={simulatePhoneAuth}
             showAlert={showAlert}
-            SIMULATION_MODE={SIMULATION_MODE}
             onSwitch={() => setShowSignIn(false)}
           />
         ) : (
@@ -485,10 +472,9 @@ export function AuthPage({ onNavigate }: AuthPageProps) {
             showConfirmPassword={showConfirmPassword}
             setShowConfirmPassword={setShowConfirmPassword}
             isLoading={isLoading}
-            simulateEmailRegistration={simulateEmailRegistration}
+            handleEmailRegistration={handleEmailRegistration}
             simulatePhoneAuth={simulatePhoneAuth}
             showAlert={showAlert}
-            SIMULATION_MODE={SIMULATION_MODE}
             onSwitch={() => setShowSignIn(true)}
           />
         )}

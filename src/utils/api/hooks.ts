@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { safeApiClient, reviewsApi, securityApi, adminApi, supportApi, trackingApi, formatErrorMessage } from './client';
+import { safeApiClient, reviewsApi, securityApi, adminApi, supportApi, trackingApi, formatErrorMessage, authApi } from './client';
 
 // =============================================================================
 // GENERIC HOOKS
@@ -97,11 +97,12 @@ export function useApiMutation<T, P = any>(
       setLoading(true);
       setError(null);
       const response = await apiCall(params);
-      if (response.success) {
-        setData(response.data);
-        return response.data;
+      if (response.success || (response.data && !response.error)) { // Handle Supabase auth response
+        const responseData = response.data?.user || response.data;
+        setData(responseData);
+        return responseData;
       } else {
-        setError(response.error || 'API call failed');
+        setError(response.error?.message || response.error || 'API call failed');
         return null;
       }
     } catch (err) {
@@ -126,6 +127,19 @@ export function useApiMutation<T, P = any>(
     reset
   };
 }
+
+// =============================================================================
+// AUTHENTICATION HOOKS
+// =============================================================================
+
+export function useSignUp() {
+  return useApiMutation(authApi.signUp);
+}
+
+export function useSignIn() {
+  return useApiMutation(authApi.signIn);
+}
+
 
 // =============================================================================
 // FR09 - RATINGS & REVIEWS HOOKS

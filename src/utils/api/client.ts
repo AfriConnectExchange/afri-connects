@@ -4,6 +4,7 @@
  */
 
 import { projectId, publicAnonKey } from '../supabase/info';
+import { supabase } from '../supabase/client';
 
 const API_BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-8392ff4e`;
 
@@ -248,6 +249,22 @@ export const mockApiClient: MockApiClient = {
 // Determine which client to use based on environment
 const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 export const safeApiClient: ApiClient | MockApiClient = isDevelopment ? mockApiClient : apiClient;
+
+// =============================================================================
+// AUTHENTICATION API FUNCTIONS
+// =============================================================================
+export const authApi = {
+  signUp: async (data: any) => {
+    return apiClient.post('/auth/signup', data);
+  },
+  signIn: async (data: any) => {
+    // Supabase handles sign-in on the client, this is for custom server logic if needed
+    return supabase.auth.signInWithPassword(data);
+  },
+  signOut: async () => {
+    return supabase.auth.signOut();
+  }
+};
 
 // =============================================================================
 // FR09 - RATINGS & REVIEWS API FUNCTIONS
