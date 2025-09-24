@@ -88,23 +88,23 @@ export function HomePage({ onNavigate }: HomePageProps) {
                 Your trusted marketplace for authentic African products, skills training, 
                 and seamless money transfers. Built by Africans, for Africa.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-start">
+              <div className="flex flex-row gap-3 md:gap-4">
                 <Button 
                   size="lg" 
                   variant="secondary"
                   onClick={() => onNavigate('marketplace')}
-                  className="text-primary w-full sm:w-auto"
+                  className="text-primary flex-1"
                 >
-                  Explore Marketplace
+                  Explore
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200 w-full sm:w-auto"
+                  className="border-white text-white bg-primary/80 hover:bg-white hover:text-primary transition-colors duration-200 flex-1"
                   onClick={() => onNavigate('auth')}
                 >
-                  Start Selling
+                  Sell
                 </Button>
               </div>
             </motion.div>
